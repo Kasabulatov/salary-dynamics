@@ -1,0 +1,26 @@
+# Daily exchange-rate refresh.
+# Free backend tiers spin down when idle, so an in-process cron is unreliable
+# (spec §3.4) — this workflow calls the protected refresh endpoint instead.
+#
+# Setup after deploying the backend:
+#   1. Repo Settings -> Secrets and variables -> Actions
+#   2. Add secret  BACKEND_URL      e.g. https://your-app.onrender.com
+#   3. Add secret  REFRESH_SECRET   same value as the backend env var
+name: Refresh exchange rates
+
+on:
+  schedule:
+    - cron: "30 6 * * *" # daily at 06:30 UTC, after most central banks publish
+  workflow_dispatch: {} # allows manual runs from the Actions tab
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call refresh endpoint
+        run: |
+          curl --fail-with-body -sS -X POST \
+            "${{ secrets.BACKEND_URL }}/api/internal/refresh" \
+            -H "X-Refresh-Secret: ${{ secrets.REFRESH_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -d '{}'
