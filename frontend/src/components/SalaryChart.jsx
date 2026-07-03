@@ -9,11 +9,28 @@ const fmtDate = (ts) =>
 const fmtMoney = (v, ccy) =>
   `${Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 })} ${ccy}`
 
-// Dot is rendered only for real salary-change events (spec §2.2).
+// Markers: blue dot = salary change (spec §2.2), ⚡ = FX moved >2% (spec §2.3).
 function EntryDot({ cx, cy, payload }) {
-  if (!payload.isEntry) return null
-  return <circle cx={cx} cy={cy} r={5} fill="#0071e3" stroke="#fff" strokeWidth={2} />
+  if (!payload.isEntry && !payload.fxEvents?.length) return null
+  return (
+    <g>
+      {payload.isEntry && (
+        <circle cx={cx} cy={cy} r={5} fill="#0071e3" stroke="#fff" strokeWidth={2} />
+      )}
+      {payload.fxEvents?.length > 0 && (
+        <text
+          x={cx} y={cy - (payload.isEntry ? 12 : 8)}
+          textAnchor="middle" fontSize="13"
+          style={{ cursor: 'default' }}
+        >
+          ⚡
+        </text>
+      )}
+    </g>
+  )
 }
+
+const windowLabel = { daily: 'in one day', weekly: 'over a week' }
 
 function ChartTooltip({ active, payload, displayCurrency }) {
   if (!active || !payload?.length) return null
@@ -31,6 +48,13 @@ function ChartTooltip({ active, payload, displayCurrency }) {
       )}
       {p.isEntry && e?.note && <div className="chart-tooltip-note">“{e.note}”</div>}
       {p.isEntry && <div className="chart-tooltip-note muted">salary change</div>}
+      {p.fxEvents?.map((ev, i) => (
+        <div key={i} className="chart-tooltip-event">
+          ⚡ {ev.base_currency} {ev.percent_change >= 0 ? 'strengthened' : 'weakened'}{' '}
+          {Math.abs(ev.percent_change).toFixed(2)}% vs {ev.quote_currency}{' '}
+          {windowLabel[ev.change_window] || ev.change_window}
+        </div>
+      ))}
     </div>
   )
 }

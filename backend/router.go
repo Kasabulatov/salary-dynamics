@@ -58,6 +58,7 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 
 	salary := &handlers.SalaryHandler{Store: store, Converter: converter}
 	series := &handlers.SeriesHandler{Salary: store, Store: store, Frank: frank, NBK: nbk}
+	events := &handlers.EventsHandler{Store: store, Frank: frank, NBK: nbk}
 	refresh := &handlers.RefreshHandler{Store: store, Frank: frank, NBK: nbk, Secret: cfg.RefreshSecret}
 
 	// Internal: rate ingestion, protected by X-Refresh-Secret (cron calls this).
@@ -72,6 +73,7 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 		r.Post("/api/salary", salary.Create)
 		r.Get("/api/salary", salary.List)
 		r.Get("/api/salary/series", series.Series)
+		r.Get("/api/events", events.Events)
 		r.Put("/api/salary/{id}", salary.Update)
 		r.Delete("/api/salary/{id}", salary.Delete)
 	})

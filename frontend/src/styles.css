@@ -219,6 +219,27 @@ body {
 .chart-tooltip-orig span { color: #86868b; }
 .chart-tooltip-note { color: #0071e3; margin-top: 7px; font-style: italic; }
 .chart-tooltip-note.muted { color: #86868b; font-style: normal; }
+.chart-tooltip-event { color: #b25000; margin-top: 7px; font-weight: 500; }
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  padding: 10px 0 14px;
+  font-size: 13px;
+  color: #6e6e73;
+  letter-spacing: -0.01em;
+}
+.chart-legend > span { display: inline-flex; align-items: center; gap: 7px; }
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0071e3;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+.legend-bolt { font-size: 13px; }
 
 /* ————— Buttons ————— */
 .btn {

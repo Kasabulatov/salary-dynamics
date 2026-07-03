@@ -7,10 +7,16 @@ import SalaryEntryForm from '../components/SalaryEntryForm'
 import DateField from '../components/DateField'
 
 // Merge the backend's daily series (one value per day at that day's rate)
-// with entry metadata, so salary-change days get a dot + note in the tooltip.
-function buildChartPoints(seriesPoints, entries) {
+// with entry metadata and ⚡ FX events, for dots/markers + tooltips.
+function buildChartPoints(seriesPoints, entries, fxEvents) {
   const sorted = [...entries].sort((a, b) => a.effective_date.localeCompare(b.effective_date))
   const entryByDate = new Map(sorted.map((e) => [e.effective_date.slice(0, 10), e]))
+  const eventsByDate = new Map()
+  for (const ev of fxEvents) {
+    const key = ev.date.slice(0, 10)
+    if (!eventsByDate.has(key)) eventsByDate.set(key, [])
+    eventsByDate.get(key).push(ev)
+  }
   let idx = 0
   let active = null
   return seriesPoints.map((p) => {
@@ -24,6 +30,7 @@ function buildChartPoints(seriesPoints, entries) {
       value: p.value,
       entry: isEntry ? entryByDate.get(p.date) : active,
       isEntry,
+      fxEvents: eventsByDate.get(p.date) ?? null,
     }
   })
 }
@@ -56,6 +63,7 @@ export default function SalaryTrackerPage() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['salary'] })
     queryClient.invalidateQueries({ queryKey: ['series'] })
+    queryClient.invalidateQueries({ queryKey: ['events'] })
   }
 
   const createMut = useMutation({
@@ -76,7 +84,27 @@ export default function SalaryTrackerPage() {
 
   const entries = data?.entries ?? []
   const seriesPoints = seriesQ.data?.points ?? []
-  const points = useMemo(() => buildChartPoints(seriesPoints, entries), [seriesPoints, entries])
+
+  // ⚡ FX events for every entry-currency vs the display currency.
+  const entryCcys = useMemo(
+    () => [...new Set(entries.map((e) => e.currency_code))].filter((c) => c !== displayCurrency),
+    [entries, displayCurrency],
+  )
+  const eventsQ = useQuery({
+    queryKey: ['events', entryCcys.join(','), displayCurrency, isoFrom, isoTo],
+    queryFn: async () => {
+      const results = await Promise.all(entryCcys.map((c) =>
+        api(`/api/events?base=${c}&quote=${displayCurrency}&from=${isoFrom}&to=${isoTo}`)))
+      return results.flatMap((r) => r.events)
+    },
+    enabled: entryCcys.length > 0,
+  })
+  const fxEvents = eventsQ.data ?? []
+
+  const points = useMemo(
+    () => buildChartPoints(seriesPoints, entries, fxEvents),
+    [seriesPoints, entries, fxEvents],
+  )
 
   // Hero stat: today's value + 30-day movement.
   const latest = points.length ? points[points.length - 1] : null
@@ -167,7 +195,13 @@ export default function SalaryTrackerPage() {
               </div>
             )}
             {!busy && !failed && (
-              <SalaryChart points={points} from={from} to={to} displayCurrency={displayCurrency} />
+              <>
+                <SalaryChart points={points} from={from} to={to} displayCurrency={displayCurrency} />
+                <div className="chart-legend">
+                  <span><span className="legend-dot" /> salary change</span>
+                  <span><span className="legend-bolt">⚡</span> exchange rate moved &gt;2% (day or week)</span>
+                </div>
+              </>
             )}
           </div>
         </div>
