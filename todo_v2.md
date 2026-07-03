@@ -3,6 +3,24 @@
 **Version:** 2.0
 **Date:** July 3, 2026
 
+---
+## STATUS — updated July 3, 2026
+
+**Done (built, tested, running locally in Docker):**
+- ✅ Phases 1–4: backend (auth, CRUD, historical conversion), React frontend
+- ✅ Phase 5.3: local manual test pass (user-verified)
+- ✅ Phase 6.1–6.2 (v2): ⚡ event markers — `currency_events` table, detection with run-coalescing, `GET /api/events`, chart markers + tooltips
+- ✅ Beyond plan: daily dynamics series (`GET /api/salary/series` — salary value per day at that day's rate, with auto rate backfill), Apple-style UI redesign, thousands separators, hybrid type-or-pick date fields
+- Git tags: `mvp-v1` (pre-markers rollback point), `v2-events` (current)
+
+**Next up:**
+- ⏭ Phase 5.1–5.2: cloud deployment (Neon/Supabase + Render/Fly + Vercel + GitHub Actions cron) — needs user-created accounts; in prod set `COOKIE_SAMESITE=none`, `COOKIE_SECURE=true`
+- ⏭ Phase 6.3 (v3): GDELT news headlines on markers
+- ⏭ Phase 7 (v4): Analytics module · Phase 8: E2E tests, CI/CD
+
+**Run it:** `docker compose up -d` → http://localhost:5173 (test account: test@example.com / password123)
+---
+
 This checklist breaks development into actionable steps, sequenced **MVP-first**. Phases 1–4 deliver a fully testable, deployable Salary Tracker. Phases 5–7 add markers, news, and the Analytics module and are explicitly post-MVP.
 
 > Conversion always uses the exchange rate **on each entry's effective date** (historical), never today's rate. See spec §2.2.
