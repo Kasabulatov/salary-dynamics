@@ -7,6 +7,7 @@ services:
     rootDir: backend
     dockerfilePath: ./Dockerfile
     plan: free
+    region: frankfurt # same region as the Neon database
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL # paste the Neon connection string when prompted
