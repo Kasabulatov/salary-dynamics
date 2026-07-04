@@ -1,0 +1,23 @@
+# Render Blueprint — creates the backend service from this repo.
+# In Render: New + -> Blueprint -> pick this repo. It reads this file.
+services:
+  - type: web
+    name: salary-dynamics-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL # paste the Neon connection string when prompted
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: REFRESH_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN # updated to the real Vercel URL after frontend deploy
+        value: https://placeholder.vercel.app
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: COOKIE_SAMESITE # Vercel <-> Render is cross-site: None + Secure required
+        value: "none"
