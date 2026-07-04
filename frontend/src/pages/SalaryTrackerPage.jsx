@@ -9,7 +9,7 @@ import DateField from '../components/DateField'
 // Merge the backend's daily series (one value per day at that day's rate)
 // with entry metadata, so salary-change days get a dot + note in the tooltip.
 // Event bands are handled separately in SalaryChart via the events prop.
-function buildChartPoints(seriesPoints, entries) {
+function buildChartPoints(seriesPoints, entries, targetByDate) {
   const sorted = [...entries].sort((a, b) => a.effective_date.localeCompare(b.effective_date))
   const entryByDate = new Map(sorted.map((e) => [e.effective_date.slice(0, 10), e]))
   let idx = 0
@@ -23,6 +23,7 @@ function buildChartPoints(seriesPoints, entries) {
     return {
       ts: new Date(p.date + 'T00:00:00Z').getTime(),
       value: p.value,
+      target: targetByDate?.get(p.date) ?? null,
       entry: isEntry ? entryByDate.get(p.date) : active,
       isEntry,
     }
@@ -38,6 +39,7 @@ export default function SalaryTrackerPage() {
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
   const [editingEntry, setEditingEntry] = useState(null)
+  const [showInflation, setShowInflation] = useState(true)
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['salary', displayCurrency],
@@ -58,6 +60,7 @@ export default function SalaryTrackerPage() {
     queryClient.invalidateQueries({ queryKey: ['salary'] })
     queryClient.invalidateQueries({ queryKey: ['series'] })
     queryClient.invalidateQueries({ queryKey: ['events'] })
+    queryClient.invalidateQueries({ queryKey: ['inflation'] })
   }
 
   const createMut = useMutation({
@@ -95,9 +98,21 @@ export default function SalaryTrackerPage() {
   })
   const fxEvents = eventsQ.data ?? []
 
+  // Inflation target line (dashed): what the first entry would need to grow
+  // to, to keep its purchasing power. Backend steps it each Jan 1.
+  const inflationQ = useQuery({
+    queryKey: ['inflation', displayCurrency, isoFrom, isoTo],
+    queryFn: () => api(`/api/salary/inflation?displayCurrency=${displayCurrency}&from=${isoFrom}&to=${isoTo}`),
+    enabled: showInflation && entries.length > 0,
+  })
+  const targetByDate = useMemo(() => {
+    if (!showInflation || !inflationQ.data?.points) return null
+    return new Map(inflationQ.data.points.map((p) => [p.date, p.value]))
+  }, [showInflation, inflationQ.data])
+
   const points = useMemo(
-    () => buildChartPoints(seriesPoints, entries),
-    [seriesPoints, entries],
+    () => buildChartPoints(seriesPoints, entries, targetByDate),
+    [seriesPoints, entries, targetByDate],
   )
 
   // Hero stat: today's value + 30-day movement.
@@ -165,6 +180,12 @@ export default function SalaryTrackerPage() {
             >
               {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
+            <button
+              className={`toggle-pill ${showInflation ? 'active' : ''}`}
+              onClick={() => setShowInflation((v) => !v)}
+            >
+              Inflation target
+            </button>
           </div>
           {preset === 'custom' && (
             <div className="toolbar toolbar-custom">
@@ -199,6 +220,12 @@ export default function SalaryTrackerPage() {
                   <span><span className="legend-band red" /> sharp drop</span>
                   <span><span className="legend-band green" /> sharp rise</span>
                   <span className="legend-hint">(&gt;2% in a day / &gt;4% in a week)</span>
+                  {showInflation && targetByDate && (
+                    <span>
+                      <span className="legend-target" /> inflation target
+                      {inflationQ.data?.country_code && ` (${inflationQ.data.country_code} CPI)`}
+                    </span>
+                  )}
                 </div>
               </>
             )}

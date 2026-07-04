@@ -54,12 +54,14 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 
 	frank := services.NewFrankfurter()
 	nbk := services.NewNBK()
+	wb := services.NewWorldBank()
 	converter := services.NewConverter(store, frank, nbk)
 
 	salary := &handlers.SalaryHandler{Store: store, Converter: converter}
 	series := &handlers.SeriesHandler{Salary: store, Store: store, Frank: frank, NBK: nbk}
 	events := &handlers.EventsHandler{Store: store, Frank: frank, NBK: nbk}
-	refresh := &handlers.RefreshHandler{Store: store, Frank: frank, NBK: nbk, Secret: cfg.RefreshSecret}
+	inflation := &handlers.InflationHandler{Salary: store, Store: store, WB: wb, Frank: frank, NBK: nbk}
+	refresh := &handlers.RefreshHandler{Store: store, Frank: frank, NBK: nbk, WB: wb, Secret: cfg.RefreshSecret}
 
 	// Internal: rate ingestion, protected by X-Refresh-Secret (cron calls this).
 	r.Post("/api/internal/refresh", refresh.Refresh)
@@ -73,6 +75,7 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 		r.Post("/api/salary", salary.Create)
 		r.Get("/api/salary", salary.List)
 		r.Get("/api/salary/series", series.Series)
+		r.Get("/api/salary/inflation", inflation.Target)
 		r.Get("/api/events", events.Events)
 		r.Put("/api/salary/{id}", salary.Update)
 		r.Delete("/api/salary/{id}", salary.Delete)

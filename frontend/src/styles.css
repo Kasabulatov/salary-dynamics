@@ -184,6 +184,21 @@ body {
 }
 .ccy-select:focus { outline: none; box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2); }
 
+.toggle-pill {
+  border: none;
+  border-radius: 980px;
+  background: #e8e8ed;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  color: #1d1d1f;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.toggle-pill.active { background: #b25000; color: #fff; }
+.toggle-pill:not(.active):hover { background: #dededf; }
+
 /* ————— Chart panel ————— */
 .chart-panel {
   background: #fff;

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"crypto/subtle"
 	"encoding/json"
 	"log"
@@ -10,12 +11,20 @@ import (
 	"dynamics-dashboard/services"
 )
 
-// RefreshHandler triggers rate ingestion. It is called by a scheduled job
-// (GitHub Actions cron in production) and protected by a shared secret.
+// RefreshStore is what the daily refresh needs from the database.
+type RefreshStore interface {
+	services.InflationStore
+	GetDistinctSalaryCurrencies(ctx context.Context) ([]string, error)
+}
+
+// RefreshHandler triggers rate + inflation ingestion. It is called by a
+// scheduled job (GitHub Actions cron in production) and protected by a
+// shared secret.
 type RefreshHandler struct {
-	Store  services.RateStore
+	Store  RefreshStore
 	Frank  services.USDSeriesFetcher
 	NBK    services.DayFetcher
+	WB     services.CPIFetcher
 	Secret string
 }
 
@@ -65,5 +74,31 @@ func (h *RefreshHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadGateway, "rate ingestion failed")
 		return
 	}
-	writeJSON(w, http.StatusOK, res)
+
+	// Refresh inflation for every currency in use, so newly published annual
+	// figures appear automatically (the Jan 1 step shows up when data lands).
+	inflationCountries := 0
+	if h.WB != nil {
+		currencies, err := h.Store.GetDistinctSalaryCurrencies(r.Context())
+		if err != nil {
+			log.Printf("refresh inflation: list currencies: %v", err)
+		}
+		for _, ccy := range currencies {
+			country, ok := services.CountryForCurrency(ccy)
+			if !ok {
+				continue
+			}
+			if err := services.EnsureInflation(r.Context(), h.Store, h.WB, country, true); err != nil {
+				log.Printf("refresh inflation %s: %v", country, err)
+				continue
+			}
+			inflationCountries++
+		}
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"frankfurter_rows":    res.FrankfurterRows,
+		"nbk_rows":            res.NBKRows,
+		"inflation_countries": inflationCountries,
+	})
 }
