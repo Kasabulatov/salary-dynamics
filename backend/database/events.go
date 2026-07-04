@@ -8,6 +8,7 @@ import (
 type CurrencyEvent struct {
 	ID             int64     `json:"id"`
 	Date           time.Time `json:"date"`
+	RefDate        time.Time `json:"ref_date"` // the earlier date this move was measured against
 	BaseCurrency   string    `json:"base_currency"`
 	QuoteCurrency  string    `json:"quote_currency"`
 	ChangeWindow   string    `json:"change_window"` // "daily" | "weekly"
@@ -36,12 +37,13 @@ func (s *Store) ReplaceEvents(ctx context.Context, base, quote string, from, to 
 	for _, e := range events {
 		if _, err := tx.Exec(ctx,
 			`INSERT INTO currency_events
-			 (date, base_currency, quote_currency, change_window, percent_change, absolute_change)
-			 VALUES ($1, $2, $3, $4, $5, $6)
+			 (date, ref_date, base_currency, quote_currency, change_window, percent_change, absolute_change)
+			 VALUES ($1, $2, $3, $4, $5, $6, $7)
 			 ON CONFLICT (date, base_currency, quote_currency, change_window) DO UPDATE
-			 SET percent_change = EXCLUDED.percent_change,
+			 SET ref_date = EXCLUDED.ref_date,
+			     percent_change = EXCLUDED.percent_change,
 			     absolute_change = EXCLUDED.absolute_change`,
-			e.Date, base, quote, e.ChangeWindow, e.PercentChange, e.AbsoluteChange); err != nil {
+			e.Date, e.RefDate, base, quote, e.ChangeWindow, e.PercentChange, e.AbsoluteChange); err != nil {
 			return err
 		}
 	}
@@ -50,7 +52,7 @@ func (s *Store) ReplaceEvents(ctx context.Context, base, quote string, from, to 
 
 func (s *Store) GetEvents(ctx context.Context, base, quote string, from, to time.Time) ([]CurrencyEvent, error) {
 	rows, err := s.Pool.Query(ctx,
-		`SELECT id, date, base_currency, quote_currency, change_window,
+		`SELECT id, date, COALESCE(ref_date, date), base_currency, quote_currency, change_window,
 		        percent_change, absolute_change, news_headline, news_url
 		 FROM currency_events
 		 WHERE base_currency = $1 AND quote_currency = $2 AND date BETWEEN $3 AND $4
@@ -63,7 +65,7 @@ func (s *Store) GetEvents(ctx context.Context, base, quote string, from, to time
 	events := []CurrencyEvent{}
 	for rows.Next() {
 		var e CurrencyEvent
-		if err := rows.Scan(&e.ID, &e.Date, &e.BaseCurrency, &e.QuoteCurrency, &e.ChangeWindow,
+		if err := rows.Scan(&e.ID, &e.Date, &e.RefDate, &e.BaseCurrency, &e.QuoteCurrency, &e.ChangeWindow,
 			&e.PercentChange, &e.AbsoluteChange, &e.NewsHeadline, &e.NewsURL); err != nil {
 			return nil, err
 		}

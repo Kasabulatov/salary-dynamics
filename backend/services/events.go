@@ -10,12 +10,14 @@ import (
 	"dynamics-dashboard/database"
 )
 
-// Significant-change thresholds (spec §2.3: > 2% daily or weekly).
+// Significant-change thresholds. Split by window (user-tuned): a 2% move in a
+// single day is rare and always news; weekly needs 4% to stay above the noise.
 const (
-	eventThreshold = 0.02
-	maxDailyGap    = 3 * 24 * time.Hour  // consecutive samples further apart aren't a "daily" move
-	weeklyLookback = 7 * 24 * time.Hour  // compare against the rate ~a week earlier
-	weeklyWindow   = 16 * 24 * time.Hour // ...found at most 16 days back (sampled history)
+	dailyThreshold  = 0.02
+	weeklyThreshold = 0.04
+	maxDailyGap     = 3 * 24 * time.Hour  // consecutive samples further apart aren't a "daily" move
+	weeklyLookback  = 7 * 24 * time.Hour  // compare against the rate ~a week earlier
+	weeklyWindow    = 16 * 24 * time.Hour // ...found at most 16 days back (sampled history)
 )
 
 // EventsStore is the subset of database.Store event detection needs.
@@ -127,9 +129,10 @@ func detectEvents(points []database.RatePoint, from, to time.Time) []database.Cu
 		}
 		if p.Date.Sub(prev.Date) <= maxDailyGap {
 			pct := p.Rate/prev.Rate - 1
-			if math.Abs(pct) >= eventThreshold {
+			if math.Abs(pct) >= dailyThreshold {
 				events = append(events, database.CurrencyEvent{
 					Date:           p.Date,
+					RefDate:        prev.Date,
 					ChangeWindow:   "daily",
 					PercentChange:  pct * 100,
 					AbsoluteChange: p.Rate - prev.Rate,
@@ -161,9 +164,10 @@ func detectEvents(points []database.RatePoint, from, to time.Time) []database.Cu
 			continue
 		}
 		pct := p.Rate/ref.Rate - 1
-		if math.Abs(pct) >= eventThreshold {
+		if math.Abs(pct) >= weeklyThreshold {
 			weekly = append(weekly, database.CurrencyEvent{
 				Date:           p.Date,
+				RefDate:        ref.Date,
 				ChangeWindow:   "weekly",
 				PercentChange:  pct * 100,
 				AbsoluteChange: p.Rate - ref.Rate,

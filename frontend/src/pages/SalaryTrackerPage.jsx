@@ -7,16 +7,11 @@ import SalaryEntryForm from '../components/SalaryEntryForm'
 import DateField from '../components/DateField'
 
 // Merge the backend's daily series (one value per day at that day's rate)
-// with entry metadata and ⚡ FX events, for dots/markers + tooltips.
-function buildChartPoints(seriesPoints, entries, fxEvents) {
+// with entry metadata, so salary-change days get a dot + note in the tooltip.
+// Event bands are handled separately in SalaryChart via the events prop.
+function buildChartPoints(seriesPoints, entries) {
   const sorted = [...entries].sort((a, b) => a.effective_date.localeCompare(b.effective_date))
   const entryByDate = new Map(sorted.map((e) => [e.effective_date.slice(0, 10), e]))
-  const eventsByDate = new Map()
-  for (const ev of fxEvents) {
-    const key = ev.date.slice(0, 10)
-    if (!eventsByDate.has(key)) eventsByDate.set(key, [])
-    eventsByDate.get(key).push(ev)
-  }
   let idx = 0
   let active = null
   return seriesPoints.map((p) => {
@@ -30,7 +25,6 @@ function buildChartPoints(seriesPoints, entries, fxEvents) {
       value: p.value,
       entry: isEntry ? entryByDate.get(p.date) : active,
       isEntry,
-      fxEvents: eventsByDate.get(p.date) ?? null,
     }
   })
 }
@@ -102,8 +96,8 @@ export default function SalaryTrackerPage() {
   const fxEvents = eventsQ.data ?? []
 
   const points = useMemo(
-    () => buildChartPoints(seriesPoints, entries, fxEvents),
-    [seriesPoints, entries, fxEvents],
+    () => buildChartPoints(seriesPoints, entries),
+    [seriesPoints, entries],
   )
 
   // Hero stat: today's value + 30-day movement.
@@ -196,10 +190,15 @@ export default function SalaryTrackerPage() {
             )}
             {!busy && !failed && (
               <>
-                <SalaryChart points={points} from={from} to={to} displayCurrency={displayCurrency} />
+                <SalaryChart
+                  points={points} from={from} to={to}
+                  displayCurrency={displayCurrency} events={fxEvents}
+                />
                 <div className="chart-legend">
                   <span><span className="legend-dot" /> salary change</span>
-                  <span><span className="legend-bolt">⚡</span> exchange rate moved &gt;2% (day or week)</span>
+                  <span><span className="legend-band red" /> sharp drop</span>
+                  <span><span className="legend-band green" /> sharp rise</span>
+                  <span className="legend-hint">(&gt;2% in a day / &gt;4% in a week)</span>
                 </div>
               </>
             )}

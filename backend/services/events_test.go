@@ -51,6 +51,9 @@ func TestDetectDailyEvent(t *testing.T) {
 	if e.Date.Format("2006-01-02") != "2024-01-12" {
 		t.Errorf("event date = %s, want 2024-01-12", e.Date.Format("2006-01-02"))
 	}
+	if e.RefDate.Format("2006-01-02") != "2024-01-11" {
+		t.Errorf("ref date = %s, want 2024-01-11 (the compared day)", e.RefDate.Format("2006-01-02"))
+	}
 	if e.PercentChange < 6.5 || e.PercentChange > 6.8 {
 		t.Errorf("percent = %v, want ~6.64", e.PercentChange)
 	}
@@ -60,10 +63,10 @@ func TestDetectDailyEvent(t *testing.T) {
 }
 
 func TestDetectWeeklyEvent(t *testing.T) {
-	// Slow drift: no single day exceeds 2%, but the week does (+3.1%).
+	// Slow drift: no single day exceeds 2%, but the week gains +4.4%.
 	points := []database.RatePoint{
-		rp("2024-01-01", 450), rp("2024-01-02", 452), rp("2024-01-03", 455),
-		rp("2024-01-04", 458), rp("2024-01-05", 460), rp("2024-01-08", 464),
+		rp("2024-01-01", 450), rp("2024-01-02", 454), rp("2024-01-03", 458),
+		rp("2024-01-04", 462), rp("2024-01-05", 465), rp("2024-01-08", 470),
 	}
 	events := detectEvents(points, date("2024-01-01"), date("2024-01-31"))
 
@@ -79,10 +82,25 @@ func TestDetectWeeklyEvent(t *testing.T) {
 		}
 	}
 	if len(weekly) == 0 {
-		t.Fatal("no weekly event detected for a 3.1% weekly move")
+		t.Fatal("no weekly event detected for a 4.4% weekly move")
 	}
 	if weekly[0].Date.Format("2006-01-02") != "2024-01-08" {
 		t.Errorf("weekly event date = %s, want 2024-01-08", weekly[0].Date.Format("2006-01-02"))
+	}
+	if weekly[0].RefDate.Format("2006-01-02") != "2024-01-01" {
+		t.Errorf("weekly ref date = %s, want 2024-01-01", weekly[0].RefDate.Format("2006-01-02"))
+	}
+}
+
+func TestWeeklyBelowNewThresholdIgnored(t *testing.T) {
+	// +3.1% weekly was an event at the old 2% threshold; at 4% it must NOT be.
+	points := []database.RatePoint{
+		rp("2024-01-01", 450), rp("2024-01-02", 452), rp("2024-01-03", 455),
+		rp("2024-01-04", 458), rp("2024-01-05", 460), rp("2024-01-08", 464),
+	}
+	events := detectEvents(points, date("2024-01-01"), date("2024-01-31"))
+	if len(events) != 0 {
+		t.Errorf("got %d events for a 3.1%% weekly move, want 0 at 4%% threshold: %+v", len(events), events)
 	}
 }
 
@@ -143,14 +161,14 @@ func TestRecomputeEventsCrossPair(t *testing.T) {
 }
 
 func TestWeeklyRunsAreCoalesced(t *testing.T) {
-	// A sustained slide: every day is >2% below its week-ago baseline.
-	// Without coalescing this would emit a marker on every single day.
+	// A sustained slide: several consecutive days are >4% below their week-ago
+	// baseline. Without coalescing this would emit a marker on every day.
 	points := []database.RatePoint{
 		rp("2024-01-01", 500), rp("2024-01-02", 500), rp("2024-01-03", 500),
 		rp("2024-01-04", 500), rp("2024-01-05", 500), rp("2024-01-06", 500),
 		rp("2024-01-07", 500),
-		rp("2024-01-08", 492), rp("2024-01-09", 488), rp("2024-01-10", 485),
-		rp("2024-01-11", 484), rp("2024-01-12", 483),
+		rp("2024-01-08", 494), rp("2024-01-09", 486), rp("2024-01-10", 474),
+		rp("2024-01-11", 475), rp("2024-01-12", 476),
 	}
 	events := detectEvents(points, date("2024-01-01"), date("2024-01-31"))
 
@@ -163,9 +181,9 @@ func TestWeeklyRunsAreCoalesced(t *testing.T) {
 	if len(weekly) != 1 {
 		t.Fatalf("got %d weekly events, want 1 coalesced: %+v", len(weekly), weekly)
 	}
-	// The strongest day of the run: 483/500 - 1 = -3.4%.
-	if weekly[0].PercentChange > -3.3 || weekly[0].PercentChange < -3.5 {
-		t.Errorf("coalesced percent = %v, want ~-3.4 (strongest of the run)", weekly[0].PercentChange)
+	// The strongest day of the run: 474/500 - 1 = -5.2%.
+	if weekly[0].PercentChange > -5.1 || weekly[0].PercentChange < -5.3 {
+		t.Errorf("coalesced percent = %v, want ~-5.2 (strongest of the run)", weekly[0].PercentChange)
 	}
 }
 
