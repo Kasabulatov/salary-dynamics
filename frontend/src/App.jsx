@@ -5,15 +5,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import SalaryTrackerPage from './pages/SalaryTrackerPage'
 import GuestTrackerPage from './pages/GuestTrackerPage'
-import ProductMetricsPage from './pages/ProductMetricsPage'
-import MetricaTestPage from './pages/MetricaTestPage'
-
-function Protected({ children }) {
-  const { user } = useAuth()
-  if (user === undefined) return <div className="page-loading">Loading…</div>
-  if (!user) return <Navigate to="/login" replace />
-  return children
-}
+import MetricaTag from './components/MetricaTag'
 
 function Home() {
   const { user } = useAuth()
@@ -38,7 +30,6 @@ function Nav() {
         <div className="nav-inner">
           <span className="nav-brand">Dynamics</span>
           <Link to="/">Salary Tracker</Link>
-          <Link to="/metrics">Product Metrics</Link>
           <span className="nav-spacer" />
           <span className="nav-user">{user.email}</span>
           <button className="nav-link-btn" onClick={logout}>Sign out</button>
@@ -76,12 +67,11 @@ function Footer() {
 export default function App() {
   return (
     <>
+      <MetricaTag />
       <Nav />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/try" element={<GuestOnly><GuestTrackerPage /></GuestOnly>} />
-        <Route path="/metrics" element={<Protected><ProductMetricsPage /></Protected>} />
-        <Route path="/metrica-test" element={<MetricaTestPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

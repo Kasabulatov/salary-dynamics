@@ -1,5 +1,4 @@
-export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
-const BASE = API_BASE
+const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
 function getCookie(name) {
   const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'))

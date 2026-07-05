@@ -112,7 +112,9 @@ export default function LandingPage() {
           <h2 className="section-title">Your data stays yours.</h2>
           <p className="section-sub">
             Guest entries never leave your browser tab. Registered accounts store
-            only your email and salary entries — nothing is shared, tracked, or sold.
+            only your email and salary entries — never shared, never sold. We collect
+            anonymous usage statistics (Yandex Metrica, no session recording) to
+            understand how the product is used; your salary data is never part of it.
           </p>
           <div className="hero-ctas">
             <Link to="/try" className="btn btn-primary btn-large">Try it now</Link>

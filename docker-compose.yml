@@ -29,10 +29,6 @@ services:
       REFRESH_SECRET: ${REFRESH_SECRET:-dev_refresh_secret_change_me}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
-      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-}
-      YANDEX_CLIENT_ID: ${YANDEX_CLIENT_ID:-}
-      YANDEX_CLIENT_SECRET: ${YANDEX_CLIENT_SECRET:-}
-      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8080}
       PORT: "8080"
     ports:
       - "8080:8080"
