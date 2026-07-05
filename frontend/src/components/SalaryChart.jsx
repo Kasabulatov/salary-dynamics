@@ -2,6 +2,7 @@ import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, ReferenceArea,
 } from 'recharts'
+import { track } from '../analytics'
 
 const DAY = 86400e3
 const tsOf = (dateStr) => new Date(dateStr.slice(0, 10) + 'T00:00:00Z').getTime()
@@ -179,7 +180,10 @@ export default function SalaryChart({ points, from, to, displayCurrency, events 
                 fill={b.drop ? '#d70015' : '#248a3d'} fillOpacity={0.09}
                 stroke={b.drop ? '#d70015' : '#248a3d'} strokeOpacity={0.25}
                 style={b.newsUrl ? { cursor: 'pointer' } : undefined}
-                onClick={b.newsUrl ? () => window.open(b.newsUrl, '_blank', 'noopener') : undefined}
+                onClick={b.newsUrl ? () => {
+                  track('news_band_clicked', {})
+                  window.open(b.newsUrl, '_blank', 'noopener')
+                } : undefined}
               />
             )}
           />

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import { api } from '../api'
 import { getGuestEntries, clearGuestEntries } from '../guestStore'
+import { track } from '../analytics'
 
 export default function RegisterPage() {
   const { register } = useAuth()
@@ -38,6 +39,7 @@ export default function RegisterPage() {
         })
       }
       if (guestEntries.length) clearGuestEntries()
+      track('register_completed', { imported_entries: guestEntries.length })
       navigate('/')
     } catch (err) {
       setError(err.message)

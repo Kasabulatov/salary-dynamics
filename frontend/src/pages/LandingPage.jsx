@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { publicCompute } from '../api'
+import { track } from '../analytics'
 import { buildChartPoints, targetMapFrom } from '../chartData'
 import SalaryChart from '../components/SalaryChart'
 
@@ -37,8 +38,14 @@ export default function LandingPage() {
           <em>every single day</em>, measured against inflation.
         </p>
         <div className="hero-ctas">
-          <Link to="/try" className="btn btn-primary btn-large">Try it — no account needed</Link>
-          <Link to="/register" className="btn btn-ghost btn-large">Create account</Link>
+          <Link to="/try" className="btn btn-primary btn-large"
+            onClick={() => track('cta_try_clicked', { from: 'hero' })}>
+            Try it — no account needed
+          </Link>
+          <Link to="/register" className="btn btn-ghost btn-large"
+            onClick={() => track('cta_register_clicked', { from: 'hero' })}>
+            Create account
+          </Link>
         </div>
       </header>
 
@@ -117,7 +124,10 @@ export default function LandingPage() {
             understand how the product is used; your salary data is never part of it.
           </p>
           <div className="hero-ctas">
-            <Link to="/try" className="btn btn-primary btn-large">Try it now</Link>
+            <Link to="/try" className="btn btn-primary btn-large"
+              onClick={() => track('cta_try_clicked', { from: 'bottom' })}>
+              Try it now
+            </Link>
           </div>
         </div>
       </section>

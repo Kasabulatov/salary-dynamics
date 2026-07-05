@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api'
+import { track } from '../analytics'
 import { buildChartPoints } from '../chartData'
 import { CURRENCIES, PRESETS, rangeForPreset } from '../currencies'
 import SalaryChart from '../components/SalaryChart'
@@ -143,7 +144,7 @@ export default function SalaryTrackerPage() {
                 <button
                   key={p.key}
                   className={preset === p.key ? 'active' : ''}
-                  onClick={() => setPreset(p.key)}
+                  onClick={() => { setPreset(p.key); track('preset_changed', { preset: p.key }) }}
                 >
                   {p.label}
                 </button>
@@ -152,14 +153,19 @@ export default function SalaryTrackerPage() {
             <select
               className="ccy-select"
               value={displayCurrency}
-              onChange={(e) => setDisplayCurrency(e.target.value)}
+              onChange={(e) => {
+                setDisplayCurrency(e.target.value)
+                track('display_currency_changed', { to: e.target.value })
+              }}
               aria-label="Display currency"
             >
               {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
             <button
               className={`toggle-pill ${showInflation ? 'active' : ''}`}
-              onClick={() => setShowInflation((v) => !v)}
+              onClick={() => {
+                setShowInflation((v) => { track('inflation_toggled', { on: !v }); return !v })
+              }}
             >
               Inflation target
             </button>
@@ -227,13 +233,24 @@ export default function SalaryTrackerPage() {
               key={`edit-${editingEntry.id}`}
               initial={editingEntry}
               busy={updateMut.isPending}
-              onSubmit={(body) => updateMut.mutateAsync({ id: editingEntry.id, body })}
+              onSubmit={async (body) => {
+                await updateMut.mutateAsync({ id: editingEntry.id, body })
+                track('entry_edited', { currency: body.currency_code })
+              }}
               onCancel={() => setEditingEntry(null)}
             />
           ) : (
             <SalaryEntryForm
               busy={createMut.isPending}
-              onSubmit={(body) => createMut.mutateAsync(body)}
+              onSubmit={async (body) => {
+                await createMut.mutateAsync(body)
+                // Behavior only — never the amount or note text.
+                track('entry_added', {
+                  currency: body.currency_code,
+                  has_note: !!body.note,
+                  entry_count: entries.length + 1,
+                })
+              }}
             />
           )}
         </div>
@@ -272,7 +289,10 @@ export default function SalaryTrackerPage() {
                       <button
                         className="link-btn danger"
                         onClick={() => {
-                          if (confirm('Delete this entry?')) deleteMut.mutate(e.id)
+                          if (confirm('Delete this entry?')) {
+                            deleteMut.mutate(e.id)
+                            track('entry_deleted', {})
+                          }
                         }}
                       >
                         Delete

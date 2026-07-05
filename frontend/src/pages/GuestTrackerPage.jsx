@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { publicCompute } from '../api'
 import { buildChartPoints, targetMapFrom } from '../chartData'
 import { getGuestEntries, addGuestEntry, updateGuestEntry, deleteGuestEntry } from '../guestStore'
+import { track } from '../analytics'
 import { CURRENCIES, PRESETS, rangeForPreset } from '../currencies'
 import SalaryChart from '../components/SalaryChart'
 import SalaryEntryForm from '../components/SalaryEntryForm'
@@ -139,11 +140,20 @@ export default function GuestTrackerPage() {
               onSubmit={async (body) => {
                 setEntries(updateGuestEntry(editingEntry.id, body))
                 setEditingEntry(null)
+                track('guest_entry_edited', { currency: body.currency_code })
               }}
               onCancel={() => setEditingEntry(null)}
             />
           ) : (
-            <SalaryEntryForm onSubmit={async (body) => setEntries(addGuestEntry(body))} />
+            <SalaryEntryForm onSubmit={async (body) => {
+              setEntries(addGuestEntry(body))
+              // Behavior only — never the amount or note text.
+              track('guest_entry_added', {
+                currency: body.currency_code,
+                has_note: !!body.note,
+                entry_count: getGuestEntries().length,
+              })
+            }} />
           )}
         </div>
       </section>
@@ -179,7 +189,10 @@ export default function GuestTrackerPage() {
                       <button className="link-btn" onClick={() => setEditingEntry(e)}>Edit</button>
                       <button className="link-btn danger"
                         onClick={() => {
-                          if (confirm('Delete this entry?')) setEntries(deleteGuestEntry(e.id))
+                          if (confirm('Delete this entry?')) {
+                            setEntries(deleteGuestEntry(e.id))
+                            track('guest_entry_deleted', {})
+                          }
                         }}>
                         Delete
                       </button>
