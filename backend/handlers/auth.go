@@ -59,6 +59,10 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, "password must be at least 8 characters")
 		return
 	}
+	if len(c.Password) > 72 { // bcrypt silently truncates beyond 72 bytes
+		writeErr(w, http.StatusBadRequest, "password must be at most 72 characters")
+		return
+	}
 
 	hash, err := security.HashPassword(c.Password)
 	if err != nil {

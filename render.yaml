@@ -8,6 +8,7 @@ services:
     dockerfilePath: ./Dockerfile
     plan: free
     region: frankfurt # same region as the Neon database
+    autoDeployTrigger: checksPass # deploy only after GitHub CI is green
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL # paste the Neon connection string when prompted

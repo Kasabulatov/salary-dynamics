@@ -26,8 +26,19 @@
   serves queue via `/api/internal/news/pending` + stores via `/api/internal/news`),
   cached forever, clickable bands open the article
 
+**v4 shipped, pivoted (July 5, 2026):** owner-only analytics — site-wide Metrica tag
+(counter 110422979, webvisor off) + 12 product goal events (behavior only, never
+amounts); owner analyzes at metrika.yandex.com. The original per-user OAuth module
+was built then removed same day (git history: 715605e → 2479c4e).
+
+**Phase 8 (July 5, 2026):** Playwright E2E suite (auth/salary/guest, USD-only
+fixtures — no external API flake), CI on every push (backend tests, frontend
+build, e2e, govulncheck + npm audit), Render deploys gated on CI green
+(autoDeployTrigger: checksPass), Dependabot weekly, §5.2 audit fixes (1 MiB
+body cap, bcrypt 72-char password cap, Referrer-Policy header).
+
 **Next up:**
-- ⏭ Phase 7 (v4): Analytics module · Phase 8: E2E tests, CI/CD (do before making repo public)
+- ⏭ optional: CSP header on the frontend (needs Metrica allowances) · repo public decision
 
 **Run locally:** `docker compose up -d` → http://localhost:5173 (local test account: test@example.com / password123)
 ---

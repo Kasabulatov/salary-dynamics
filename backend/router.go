@@ -21,6 +21,7 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.RequestSize(1 << 20)) // 1 MiB body cap on every endpoint
 	r.Use(secureHeaders)
 	r.Use(httprate.LimitByIP(120, time.Minute)) // global rate limit
 
@@ -101,6 +102,7 @@ func secureHeaders(next http.Handler) http.Handler {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "DENY")
 		w.Header().Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
+		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
 		next.ServeHTTP(w, r)
 	})
 }
