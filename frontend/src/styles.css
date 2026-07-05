@@ -531,6 +531,26 @@ select {
   font-size: 14px;
 }
 
+/* ————— Product Metrics (v4) ————— */
+.hero-compact { padding: 64px 22px 40px; }
+.connect-card { text-align: center; padding: 40px 0 24px; }
+.metric-totals {
+  display: flex;
+  justify-content: center;
+  gap: 36px;
+  padding: 8px 0 18px;
+  font-size: 15px;
+  color: #6e6e73;
+  flex-wrap: wrap;
+}
+.metric-totals strong {
+  color: #1d1d1f;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-right: 6px;
+}
+
 /* ————— Footer ————— */
 .footer {
   padding: 28px 22px 40px;

@@ -63,6 +63,14 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 	inflation := &handlers.InflationHandler{Salary: store, Store: store, WB: wb, Frank: frank, NBK: nbk}
 	refresh := &handlers.RefreshHandler{Store: store, Frank: frank, NBK: nbk, WB: wb, Secret: cfg.RefreshSecret}
 	news := &handlers.NewsHandler{Store: store, Secret: cfg.RefreshSecret}
+	analytics := &handlers.AnalyticsHandler{
+		Store:         store,
+		Yandex:        services.NewYandex(cfg.YandexClientID, cfg.YandexClientSecret),
+		EncryptionKey: cfg.TokenEncryptionKey,
+		PublicAPIURL:  cfg.PublicAPIURL,
+		FrontendURL:   cfg.CORSOrigin,
+		CookieSecure:  cfg.CookieSecure,
+	}
 
 	// Internal: cron-driven ingestion, protected by X-Refresh-Secret.
 	// The workflow queries GDELT itself and posts headlines back (news.*).
@@ -91,6 +99,15 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 		r.Get("/api/events", events.Events)
 		r.Put("/api/salary/{id}", salary.Update)
 		r.Delete("/api/salary/{id}", salary.Delete)
+
+		// v4: Product Metrics (Yandex Metrica). OAuth start/callback are
+		// browser navigations: auth cookie present, CSRF skips GETs.
+		r.Get("/api/oauth/yandex/start", analytics.OAuthStart)
+		r.Get("/api/oauth/yandex/callback", analytics.OAuthCallback)
+		r.Get("/api/analytics/connections", analytics.Connections)
+		r.Delete("/api/analytics/connections", analytics.Disconnect)
+		r.Get("/api/analytics/counters", analytics.Counters)
+		r.Get("/api/analytics/data", analytics.Data)
 	})
 
 	return r

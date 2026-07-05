@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"log"
 	"net/http"
 	"os"
@@ -16,6 +17,13 @@ type Config struct {
 	CookieSameSite http.SameSite
 	Port           string
 	MigrationsDir  string
+
+	// v4 analytics module — optional: endpoints report "not configured"
+	// until all three are set.
+	TokenEncryptionKey []byte // 32 bytes from 64 hex chars, or nil
+	YandexClientID     string
+	YandexClientSecret string
+	PublicAPIURL       string
 }
 
 func LoadConfig() Config {
@@ -28,6 +36,17 @@ func LoadConfig() Config {
 		CookieSameSite: parseSameSite(envOr("COOKIE_SAMESITE", "lax")),
 		Port:           envOr("PORT", "8080"),
 		MigrationsDir:  envOr("MIGRATIONS_DIR", "migrations"),
+
+		YandexClientID:     os.Getenv("YANDEX_CLIENT_ID"),
+		YandexClientSecret: os.Getenv("YANDEX_CLIENT_SECRET"),
+		PublicAPIURL:       envOr("PUBLIC_API_URL", "http://localhost:8080"),
+	}
+	if hexKey := os.Getenv("TOKEN_ENCRYPTION_KEY"); hexKey != "" {
+		key, err := hex.DecodeString(hexKey)
+		if err != nil || len(key) != 32 {
+			log.Fatalf("TOKEN_ENCRYPTION_KEY must be 64 hex characters (32 bytes)")
+		}
+		cfg.TokenEncryptionKey = key
 	}
 	return cfg
 }
