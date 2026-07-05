@@ -47,7 +47,7 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 
 	// Public auth routes with a stricter rate limit (brute-force protection).
 	r.Group(func(r chi.Router) {
-		r.Use(httprate.LimitByIP(10, time.Minute))
+		r.Use(httprate.LimitByIP(cfg.AuthRatePerMin, time.Minute))
 		r.Post("/api/register", auth.Register)
 		r.Post("/api/login", auth.Login)
 	})

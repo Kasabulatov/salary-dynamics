@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 // Config holds all runtime configuration, loaded from environment variables.
@@ -17,6 +18,10 @@ type Config struct {
 	Port           string
 	MigrationsDir  string
 
+	// Auth endpoints rate limit per IP per minute. Production default is 10
+	// (brute-force protection); local/CI compose raises it so the E2E suite
+	// (which registers many users quickly) doesn't trip it.
+	AuthRatePerMin int
 }
 
 func LoadConfig() Config {
@@ -29,7 +34,14 @@ func LoadConfig() Config {
 		CookieSameSite: parseSameSite(envOr("COOKIE_SAMESITE", "lax")),
 		Port:           envOr("PORT", "8080"),
 		MigrationsDir:  envOr("MIGRATIONS_DIR", "migrations"),
-
+		AuthRatePerMin: 10,
+	}
+	if s := os.Getenv("AUTH_RATE_PER_MIN"); s != "" {
+		n, err := strconv.Atoi(s)
+		if err != nil || n < 1 {
+			log.Fatalf("AUTH_RATE_PER_MIN must be a positive integer")
+		}
+		cfg.AuthRatePerMin = n
 	}
 	return cfg
 }

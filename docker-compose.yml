@@ -29,6 +29,7 @@ services:
       REFRESH_SECRET: ${REFRESH_SECRET:-dev_refresh_secret_change_me}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      AUTH_RATE_PER_MIN: ${AUTH_RATE_PER_MIN:-100} # E2E registers many users; prod (Render) keeps 10
       PORT: "8080"
     ports:
       - "8080:8080"
