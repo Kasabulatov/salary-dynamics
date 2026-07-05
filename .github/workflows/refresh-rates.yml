@@ -3,10 +3,12 @@
 # Step 1 asks the backend to ingest exchange rates + inflation (free backend
 # tiers spin down, so no in-process cron — spec §3.4).
 #
-# Step 2 fills news headlines for ⚡ events. GDELT chronically rate-limits
-# fixed cloud egress IPs (Render's gets 429'd), but GitHub runners get a
-# fresh IP every run — so THIS workflow queries GDELT and posts the results
-# back through a secret-protected endpoint.
+# Step 2 fills news headlines for ⚡ events via Google News RSS search
+# (keyless, supports historical after:/before: operators). The fetch runs
+# HERE rather than in the backend because news providers throttle fixed
+# cloud egress IPs (GDELT 429'd both Render and GitHub runners; Google News
+# tolerates this workflow's one small burst per day). Results are posted
+# back through a secret-protected endpoint and cached forever.
 #
 # Secrets required: BACKEND_URL, REFRESH_SECRET.
 name: Refresh exchange rates
@@ -28,7 +30,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{}'
 
-      - name: Fill news headlines via GDELT
+      - name: Fill news headlines via Google News
         run: |
           set -euo pipefail
           URL="${{ secrets.BACKEND_URL }}"
@@ -46,27 +48,41 @@ jobs:
             TERMS=$(echo "$ITEM" | jq -r '.terms')
             START=$(echo "$ITEM" | jq -r '.start')
             END=$(echo "$ITEM" | jq -r '.end')
+            # GDELT-style datetimes -> Google News date operators (before: exclusive).
+            AFTER="${START:0:4}-${START:4:2}-${START:6:2}"
+            BEFORE=$(date -d "${END:0:4}-${END:4:2}-${END:6:2} +1 day" +%F)
 
-            sleep 6 # GDELT's documented limit: one request per 5 seconds
-            ART=$(curl -sS -m 25 -G "https://api.gdeltproject.org/api/v2/doc/doc" \
-              --data-urlencode "query=$TERMS sourcelang:eng" \
-              --data-urlencode "mode=artlist" \
-              --data-urlencode "format=json" \
-              --data-urlencode "maxrecords=3" \
-              --data-urlencode "sort=hybridrel" \
-              --data-urlencode "startdatetime=$START" \
-              --data-urlencode "enddatetime=$END" \
-              -H "User-Agent: salary-dynamics/1.0 (personal finance dashboard)" || echo "")
+            sleep 2 # polite pacing
+            Q=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" \
+              "$TERMS after:$AFTER before:$BEFORE")
+            ART=$(curl -sS -m 20 \
+              "https://news.google.com/rss/search?q=$Q&hl=en-US&gl=US&ceid=US:en" \
+              -H "User-Agent: Mozilla/5.0 (compatible; salary-dynamics/1.0)" \
+              | python3 -c '
+          import sys, json, xml.etree.ElementTree as ET
+          try:
+              root = ET.fromstring(sys.stdin.read())
+              it = root.find(".//item")
+              if it is None:
+                  print(json.dumps({"title": "", "link": ""}))
+              else:
+                  print(json.dumps({
+                      "title": (it.findtext("title") or "").strip()[:300],
+                      "link": (it.findtext("link") or "").strip()[:2000],
+                  }))
+          except Exception:
+              print(json.dumps({"error": True}))
+          ' || echo '{"error": true}')
 
-            if echo "$ART" | jq -e . >/dev/null 2>&1; then
-              TITLE=$(echo "$ART" | jq -r '.articles[0].title // ""' | head -c 300)
-              LINK=$(echo "$ART" | jq -r '.articles[0].url // ""' | head -c 2000)
-              echo "event $ID ($(echo "$ITEM" | jq -r '.pair')): ${TITLE:-no coverage}"
-              RESULTS=$(echo "$RESULTS" | jq --argjson id "$ID" --arg t "$TITLE" --arg u "$LINK" \
-                '. + [{id: $id, headline: $t, url: $u}]')
+            if echo "$ART" | jq -e '.error // false' | grep -q true; then
+              # Parse/network failure: leave NULL so tomorrow's run retries.
+              echo "event $ID: fetch failed — skipping"
             else
-              # Non-JSON = throttled/error page: leave NULL, retried tomorrow.
-              echo "event $ID: GDELT returned non-JSON (throttled?) — skipping"
+              TITLE=$(echo "$ART" | jq -r '.title')
+              LINK=$(echo "$ART" | jq -r '.link')
+              echo "event $ID ($(echo "$ITEM" | jq -r '.pair')): ${TITLE:-no coverage}"
+              RESULTS=$(echo "$RESULTS" | jq --argjson id "$ID" \
+                --arg t "$TITLE" --arg u "$LINK" '. + [{id: $id, headline: $t, url: $u}]')
             fi
           done
 

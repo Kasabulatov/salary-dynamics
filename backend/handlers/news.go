@@ -11,9 +11,10 @@ import (
 )
 
 // NewsHandler exposes the two halves of the news pipeline to the daily
-// GitHub Actions workflow, which queries GDELT itself: cloud egress IPs
-// (Render's included) are chronically rate-limited by GDELT, while GitHub
-// runners get a fresh IP every run. Both endpoints require the refresh secret.
+// GitHub Actions workflow, which fetches headlines itself (currently from
+// Google News RSS): news providers throttle fixed cloud egress IPs, so the
+// backend never fetches — it only serves the queue and stores results.
+// Both endpoints require the refresh secret.
 type NewsHandler struct {
 	Store  services.NewsStore
 	Secret string
