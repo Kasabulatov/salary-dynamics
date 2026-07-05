@@ -26,3 +26,19 @@ export async function api(path, { method = 'GET', body } = {}) {
   }
   return data
 }
+
+// publicCompute: stateless computation for guest mode and the landing demo.
+// Entries travel in the request; the server stores nothing.
+export function publicCompute({ entries, displayCurrency, from, to }) {
+  return api('/api/public/compute', {
+    method: 'POST',
+    body: {
+      entries,
+      display_currency: displayCurrency,
+      from,
+      to,
+      include_inflation: true,
+      include_events: true,
+    },
+  })
+}

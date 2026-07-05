@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
+import { api } from '../api'
+import { getGuestEntries, clearGuestEntries } from '../guestStore'
 
 export default function RegisterPage() {
   const { register } = useAuth()
@@ -10,6 +12,7 @@ export default function RegisterPage() {
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const guestCount = getGuestEntries().length
 
   const onSubmit = async (e) => {
     e.preventDefault()
@@ -25,6 +28,16 @@ export default function RegisterPage() {
     setBusy(true)
     try {
       await register(email, password)
+      // Carry guest entries into the fresh account (register() logged us in,
+      // so the CSRF cookie is present for these writes).
+      const guestEntries = getGuestEntries()
+      for (const { amount, currency_code, effective_date, note } of guestEntries) {
+        await api('/api/salary', {
+          method: 'POST',
+          body: { amount, currency_code, effective_date, note },
+        })
+      }
+      if (guestEntries.length) clearGuestEntries()
       navigate('/')
     } catch (err) {
       setError(err.message)
@@ -37,6 +50,12 @@ export default function RegisterPage() {
     <div className="auth-page">
       <form className="auth-card" onSubmit={onSubmit}>
         <h1>Create your account.</h1>
+        {guestCount > 0 && (
+          <div className="guest-import-note">
+            Your {guestCount} guest {guestCount === 1 ? 'entry' : 'entries'} will be
+            saved to your new account automatically.
+          </div>
+        )}
         {error && <div className="form-error">{error}</div>}
         <label>
           Email

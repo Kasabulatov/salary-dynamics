@@ -1,34 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api'
+import { buildChartPoints } from '../chartData'
 import { CURRENCIES, PRESETS, rangeForPreset } from '../currencies'
 import SalaryChart from '../components/SalaryChart'
 import SalaryEntryForm from '../components/SalaryEntryForm'
 import DateField from '../components/DateField'
-
-// Merge the backend's daily series (one value per day at that day's rate)
-// with entry metadata, so salary-change days get a dot + note in the tooltip.
-// Event bands are handled separately in SalaryChart via the events prop.
-function buildChartPoints(seriesPoints, entries, targetByDate) {
-  const sorted = [...entries].sort((a, b) => a.effective_date.localeCompare(b.effective_date))
-  const entryByDate = new Map(sorted.map((e) => [e.effective_date.slice(0, 10), e]))
-  let idx = 0
-  let active = null
-  return seriesPoints.map((p) => {
-    while (idx < sorted.length && sorted[idx].effective_date.slice(0, 10) <= p.date) {
-      active = sorted[idx]
-      idx++
-    }
-    const isEntry = entryByDate.has(p.date)
-    return {
-      ts: new Date(p.date + 'T00:00:00Z').getTime(),
-      value: p.value,
-      target: targetByDate?.get(p.date) ?? null,
-      entry: isEntry ? entryByDate.get(p.date) : active,
-      isEntry,
-    }
-  })
-}
 
 const fmtBig = (v) => v.toLocaleString(undefined, { maximumFractionDigits: 0 })
 

@@ -66,6 +66,14 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 	// Internal: rate ingestion, protected by X-Refresh-Secret (cron calls this).
 	r.Post("/api/internal/refresh", refresh.Refresh)
 
+	// Public stateless compute (guest mode + landing demo): stricter limit,
+	// nothing is persisted from these requests.
+	public := &handlers.PublicHandler{Store: store, Converter: converter, WB: wb, Frank: frank, NBK: nbk}
+	r.Group(func(r chi.Router) {
+		r.Use(httprate.LimitByIP(20, time.Minute))
+		r.Post("/api/public/compute", public.Compute)
+	})
+
 	// Protected routes: valid JWT cookie + CSRF header on writes.
 	r.Group(func(r chi.Router) {
 		r.Use(handlers.Auth(cfg.JWTSecret))
