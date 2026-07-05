@@ -1,11 +1,14 @@
-# Daily exchange-rate refresh.
-# Free backend tiers spin down when idle, so an in-process cron is unreliable
-# (spec §3.4) — this workflow calls the protected refresh endpoint instead.
+# Daily data refresh.
 #
-# Setup after deploying the backend:
-#   1. Repo Settings -> Secrets and variables -> Actions
-#   2. Add secret  BACKEND_URL      e.g. https://your-app.onrender.com
-#   3. Add secret  REFRESH_SECRET   same value as the backend env var
+# Step 1 asks the backend to ingest exchange rates + inflation (free backend
+# tiers spin down, so no in-process cron — spec §3.4).
+#
+# Step 2 fills news headlines for ⚡ events. GDELT chronically rate-limits
+# fixed cloud egress IPs (Render's gets 429'd), but GitHub runners get a
+# fresh IP every run — so THIS workflow queries GDELT and posts the results
+# back through a secret-protected endpoint.
+#
+# Secrets required: BACKEND_URL, REFRESH_SECRET.
 name: Refresh exchange rates
 
 on:
@@ -17,10 +20,55 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - name: Call refresh endpoint
+      - name: Refresh rates and inflation
         run: |
           curl --fail-with-body -sS -X POST \
             "${{ secrets.BACKEND_URL }}/api/internal/refresh" \
             -H "X-Refresh-Secret: ${{ secrets.REFRESH_SECRET }}" \
             -H "Content-Type: application/json" \
             -d '{}'
+
+      - name: Fill news headlines via GDELT
+        run: |
+          set -euo pipefail
+          URL="${{ secrets.BACKEND_URL }}"
+          AUTH="X-Refresh-Secret: ${{ secrets.REFRESH_SECRET }}"
+
+          PENDING=$(curl --fail-with-body -sS "$URL/api/internal/news/pending?limit=15" -H "$AUTH")
+          COUNT=$(echo "$PENDING" | jq '.items | length')
+          echo "events awaiting news: $COUNT"
+          if [ "$COUNT" -eq 0 ]; then exit 0; fi
+
+          RESULTS='[]'
+          for i in $(seq 0 $((COUNT - 1))); do
+            ITEM=$(echo "$PENDING" | jq ".items[$i]")
+            ID=$(echo "$ITEM" | jq '.id')
+            TERMS=$(echo "$ITEM" | jq -r '.terms')
+            START=$(echo "$ITEM" | jq -r '.start')
+            END=$(echo "$ITEM" | jq -r '.end')
+
+            sleep 6 # GDELT's documented limit: one request per 5 seconds
+            ART=$(curl -sS -m 25 -G "https://api.gdeltproject.org/api/v2/doc/doc" \
+              --data-urlencode "query=$TERMS sourcelang:eng" \
+              --data-urlencode "mode=artlist" \
+              --data-urlencode "format=json" \
+              --data-urlencode "maxrecords=3" \
+              --data-urlencode "sort=hybridrel" \
+              --data-urlencode "startdatetime=$START" \
+              --data-urlencode "enddatetime=$END" \
+              -H "User-Agent: salary-dynamics/1.0 (personal finance dashboard)" || echo "")
+
+            if echo "$ART" | jq -e . >/dev/null 2>&1; then
+              TITLE=$(echo "$ART" | jq -r '.articles[0].title // ""' | head -c 300)
+              LINK=$(echo "$ART" | jq -r '.articles[0].url // ""' | head -c 2000)
+              echo "event $ID ($(echo "$ITEM" | jq -r '.pair')): ${TITLE:-no coverage}"
+              RESULTS=$(echo "$RESULTS" | jq --argjson id "$ID" --arg t "$TITLE" --arg u "$LINK" \
+                '. + [{id: $id, headline: $t, url: $u}]')
+            else
+              # Non-JSON = throttled/error page: leave NULL, retried tomorrow.
+              echo "event $ID: GDELT returned non-JSON (throttled?) — skipping"
+            fi
+          done
+
+          echo "$RESULTS" | jq '{items: .}' | curl --fail-with-body -sS -X POST \
+            "$URL/api/internal/news" -H "$AUTH" -H "Content-Type: application/json" -d @-

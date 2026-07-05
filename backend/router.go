@@ -55,17 +55,20 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 	frank := services.NewFrankfurter()
 	nbk := services.NewNBK()
 	wb := services.NewWorldBank()
-	gdelt := services.NewGDELT()
 	converter := services.NewConverter(store, frank, nbk)
 
 	salary := &handlers.SalaryHandler{Store: store, Converter: converter}
 	series := &handlers.SeriesHandler{Salary: store, Store: store, Frank: frank, NBK: nbk}
 	events := &handlers.EventsHandler{Store: store, Frank: frank, NBK: nbk}
 	inflation := &handlers.InflationHandler{Salary: store, Store: store, WB: wb, Frank: frank, NBK: nbk}
-	refresh := &handlers.RefreshHandler{Store: store, Frank: frank, NBK: nbk, WB: wb, GDELT: gdelt, Secret: cfg.RefreshSecret}
+	refresh := &handlers.RefreshHandler{Store: store, Frank: frank, NBK: nbk, WB: wb, Secret: cfg.RefreshSecret}
+	news := &handlers.NewsHandler{Store: store, Secret: cfg.RefreshSecret}
 
-	// Internal: rate ingestion, protected by X-Refresh-Secret (cron calls this).
+	// Internal: cron-driven ingestion, protected by X-Refresh-Secret.
+	// The workflow queries GDELT itself and posts headlines back (news.*).
 	r.Post("/api/internal/refresh", refresh.Refresh)
+	r.Get("/api/internal/news/pending", news.Pending)
+	r.Post("/api/internal/news", news.Submit)
 
 	// Public stateless compute (guest mode + landing demo): stricter limit,
 	// nothing is persisted from these requests.

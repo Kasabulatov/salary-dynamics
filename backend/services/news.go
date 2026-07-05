@@ -2,66 +2,46 @@ package services
 
 import (
 	"context"
-	"log"
-	"time"
 
 	"dynamics-dashboard/database"
 )
 
-// HeadlineFetcher fetches the top headline for search terms in a window.
-type HeadlineFetcher interface {
-	FetchTopHeadline(ctx context.Context, terms string, from, to time.Time) (*Headline, error)
-}
-
 // NewsStore persists fetched headlines and lists events awaiting one.
+// Fetching itself happens in the GitHub Actions workflow (GDELT rate-limits
+// cloud egress IPs like Render's; runner IPs are fresh every run) — the
+// backend only serves the queue and stores the results.
 type NewsStore interface {
 	UpdateEventNews(ctx context.Context, id int64, headline, url string) error
 	GetEventsMissingNews(ctx context.Context, limit int) ([]database.CurrencyEvent, error)
 }
 
-// EnrichPendingNews fills missing headlines for stored events. It runs from
-// the daily refresh job — NOT the request path — because GDELT rate-limits
-// aggressively (~1 request / 5s): calls are spaced by `delay` and capped at
-// `limit` per run. Each event is only ever queried once: a stored empty
-// headline records "checked, nothing found". Failures are logged and left
-// NULL so the next run retries — news is decoration, never a blocker.
-func EnrichPendingNews(ctx context.Context, store NewsStore, gdelt HeadlineFetcher, limit int, delay time.Duration) int {
-	if gdelt == nil {
-		return 0
-	}
-	pending, err := store.GetEventsMissingNews(ctx, limit)
-	if err != nil {
-		log.Printf("news: list pending: %v", err)
-		return 0
-	}
+// newsTermsForCurrency maps a currency to GDELT search terms.
+var newsTermsForCurrency = map[string]string{
+	"KZT": "Kazakhstan tenge", "USD": "US dollar", "EUR": "euro currency",
+	"RUB": "Russian ruble", "GBP": "British pound sterling", "CHF": "Swiss franc",
+	"JPY": "Japanese yen", "CNY": "Chinese yuan", "TRY": "Turkish lira",
+	"AUD": "Australian dollar", "BGN": "Bulgarian lev", "BRL": "Brazilian real",
+	"CAD": "Canadian dollar", "CZK": "Czech koruna", "DKK": "Danish krone",
+	"HKD": "Hong Kong dollar", "HUF": "Hungarian forint", "IDR": "Indonesian rupiah",
+	"ILS": "Israeli shekel", "INR": "Indian rupee", "ISK": "Icelandic krona",
+	"KRW": "Korean won", "MXN": "Mexican peso", "MYR": "Malaysian ringgit",
+	"NOK": "Norwegian krone", "NZD": "New Zealand dollar", "PHP": "Philippine peso",
+	"PLN": "Polish zloty", "RON": "Romanian leu", "SEK": "Swedish krona",
+	"SGD": "Singapore dollar", "THB": "Thai baht", "ZAR": "South African rand",
+}
 
-	filled := 0
-	for i := range pending {
-		if i > 0 {
-			select {
-			case <-time.After(delay): // respect GDELT's rate limit
-			case <-ctx.Done():
-				return filled
-			}
-		}
-		e := &pending[i]
-		terms := NewsTermsForPair(e.BaseCurrency, e.QuoteCurrency)
-		// Search the compared window plus a day of follow-up coverage.
-		hl, err := gdelt.FetchTopHeadline(ctx, terms, e.RefDate, e.Date.AddDate(0, 0, 1))
-		if err != nil {
-			log.Printf("news: %s/%s %s: %v", e.BaseCurrency, e.QuoteCurrency, e.Date.Format("2006-01-02"), err)
-			continue // transient failure: leave NULL so the next run retries
-		}
+// majors are currencies whose pair-partner is usually the story.
+var majorCurrencies = map[string]bool{"USD": true, "EUR": true, "GBP": true, "CHF": true, "JPY": true}
 
-		headline, newsURL := "", ""
-		if hl != nil {
-			headline, newsURL = hl.Title, hl.URL
-		}
-		if err := store.UpdateEventNews(ctx, e.ID, headline, newsURL); err != nil {
-			log.Printf("news: store %d: %v", e.ID, err)
-			continue
-		}
-		filled++
+// NewsTermsForPair picks the search terms for an event on base/quote:
+// prefer the non-major currency (that's where the news is), fall back to base.
+func NewsTermsForPair(base, quote string) string {
+	pick := base
+	if majorCurrencies[base] && !majorCurrencies[quote] {
+		pick = quote
 	}
-	return filled
+	if terms, ok := newsTermsForCurrency[pick]; ok {
+		return terms
+	}
+	return pick + " currency exchange rate"
 }
