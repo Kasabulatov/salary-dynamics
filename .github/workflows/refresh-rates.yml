@@ -60,19 +60,30 @@ jobs:
               -H "User-Agent: Mozilla/5.0 (compatible; salary-dynamics/1.0)" \
               | python3 -c '
           import sys, json, xml.etree.ElementTree as ET
+          # Prefer the first article whose title mentions the search terms
+          # (currency/country) — avoids caching loosely related stories.
+          terms = [w.lower() for w in sys.argv[1].split()]
           try:
               root = ET.fromstring(sys.stdin.read())
-              it = root.find(".//item")
-              if it is None:
+              items = root.findall(".//item")
+              best = None
+              for it in items:
+                  title = (it.findtext("title") or "").lower()
+                  if any(w in title for w in terms):
+                      best = it
+                      break
+              if best is None and items:
+                  best = items[0]
+              if best is None:
                   print(json.dumps({"title": "", "link": ""}))
               else:
                   print(json.dumps({
-                      "title": (it.findtext("title") or "").strip()[:300],
-                      "link": (it.findtext("link") or "").strip()[:2000],
+                      "title": (best.findtext("title") or "").strip()[:300],
+                      "link": (best.findtext("link") or "").strip()[:2000],
                   }))
           except Exception:
               print(json.dumps({"error": True}))
-          ' || echo '{"error": true}')
+          ' "$TERMS" || echo '{"error": true}')
 
             if echo "$ART" | jq -e '.error // false' | grep -q true; then
               # Parse/network failure: leave NULL so tomorrow's run retries.

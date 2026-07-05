@@ -19,8 +19,14 @@
 - DB: Neon Postgres 17 (Frankfurt, pooled) · Daily rate cron: GitHub Actions, 06:30 UTC, verified green
 - Repo: github.com/Kasabulatov/salary-dynamics (private)
 
+**v2.2 + v3 shipped (July 5, 2026):**
+- ✅ Landing page + guest mode (sessionStorage, stateless `POST /api/public/compute`)
+- ✅ Phase 6.3 (v3): news headlines on event bands — fetched by the GitHub Actions
+  workflow from **Google News RSS** (GDELT throttles all cloud/CI IPs; backend
+  serves queue via `/api/internal/news/pending` + stores via `/api/internal/news`),
+  cached forever, clickable bands open the article
+
 **Next up:**
-- ⏭ Phase 6.3 (v3): GDELT news headlines on markers
 - ⏭ Phase 7 (v4): Analytics module · Phase 8: E2E tests, CI/CD (do before making repo public)
 
 **Run locally:** `docker compose up -d` → http://localhost:5173 (local test account: test@example.com / password123)
