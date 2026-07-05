@@ -167,13 +167,17 @@ The frontend API client must send cookies: `fetch(url, { credentials: 'include' 
 | POST | `/api/register` | – | Create account |
 | POST | `/api/login` | – | Log in (sets cookie) |
 | POST | `/api/logout` | – | Clear cookie |
+| GET | `/api/me` | ✅ | Current user (session restore) |
 | GET | `/api/salary?displayCurrency=USD` | ✅ | List entries with historical conversion |
 | POST | `/api/salary` | ✅ | Create entry |
 | PUT | `/api/salary/{id}` | ✅ | Update entry |
 | DELETE | `/api/salary/{id}` | ✅ | Delete entry |
-| POST | `/api/internal/refresh` | secret | Ingest/refresh historical rates |
-| GET | `/api/events` | ✅ | Exchange-rate event markers (v2) |
-| GET | `/api/analytics` | ✅ | Product metrics (v4) |
+| GET | `/api/salary/series` | ✅ | Daily dynamics line (value per day at that day's rate) |
+| GET | `/api/salary/inflation` | ✅ | Inflation target line (World Bank CPI, Jan-1 steps) |
+| GET | `/api/events?base=&quote=` | ✅ | ⚡ events (>2%/day, >4%/week) incl. cached news headlines |
+| POST | `/api/public/compute` | – (rate-limited) | Stateless compute for guest mode & landing demo |
+| POST | `/api/internal/refresh` | secret | Daily cron: rates + inflation + GDELT news headlines |
+| GET | `/api/analytics` | ✅ | Product metrics (v4, not built yet) |
 
 ---
 

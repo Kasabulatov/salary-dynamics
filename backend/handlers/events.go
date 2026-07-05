@@ -10,7 +10,9 @@ import (
 )
 
 // EventsHandler serves ⚡ significant exchange-rate change markers (spec §2.3):
-// days when base/quote moved more than 2% within a day or a week.
+// days when base/quote moved more than 2% within a day or 4% within a week.
+// Headlines are filled in by the daily refresh job (GDELT rate limits make
+// request-path fetching unusable); this endpoint serves whatever is cached.
 type EventsHandler struct {
 	Store services.EventsStore
 	Frank services.USDSeriesFetcher

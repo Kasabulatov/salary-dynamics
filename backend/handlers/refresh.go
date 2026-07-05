@@ -14,17 +14,19 @@ import (
 // RefreshStore is what the daily refresh needs from the database.
 type RefreshStore interface {
 	services.InflationStore
+	services.NewsStore
 	GetDistinctSalaryCurrencies(ctx context.Context) ([]string, error)
 }
 
-// RefreshHandler triggers rate + inflation ingestion. It is called by a
-// scheduled job (GitHub Actions cron in production) and protected by a
+// RefreshHandler triggers rate + inflation + news ingestion. It is called by
+// a scheduled job (GitHub Actions cron in production) and protected by a
 // shared secret.
 type RefreshHandler struct {
 	Store  RefreshStore
 	Frank  services.USDSeriesFetcher
 	NBK    services.DayFetcher
 	WB     services.CPIFetcher
+	GDELT  services.HeadlineFetcher
 	Secret string
 }
 
@@ -96,9 +98,15 @@ func (h *RefreshHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Fill missing news headlines, politely spaced for GDELT's rate limit
+	// (observed: bursts get 429'd for ~a minute; 10s spacing stays clear).
+	// This is the only place GDELT is called — chart requests serve the cache.
+	newsFilled := services.EnrichPendingNews(r.Context(), h.Store, h.GDELT, 20, 10*time.Second)
+
 	writeJSON(w, http.StatusOK, map[string]any{
 		"frankfurter_rows":    res.FrankfurterRows,
 		"nbk_rows":            res.NBKRows,
 		"inflation_countries": inflationCountries,
+		"news_filled":         newsFilled,
 	})
 }

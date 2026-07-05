@@ -250,6 +250,14 @@ body {
 .chart-tooltip-event.up .chart-tooltip-event-head { color: #248a3d; }
 .chart-tooltip-event-abs { color: #1d1d1f; margin-top: 3px; }
 .chart-tooltip-event-period { color: #86868b; margin-top: 2px; }
+.chart-tooltip-news {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  color: #1d1d1f;
+  font-style: italic;
+}
+.chart-tooltip-news-hint { color: #0066cc; font-style: normal; font-size: 11px; margin-top: 2px; }
 
 .chart-legend {
   display: flex;

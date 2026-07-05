@@ -95,6 +95,12 @@ function ChartTooltip({ active, payload, displayCurrency, coveringEvents, valueB
             <div className="chart-tooltip-event-period">
               compared: {fmtDate(startTs)} → {fmtDate(endTs)}
             </div>
+            {ev.news_headline && (
+              <div className="chart-tooltip-news">
+                📰 “{ev.news_headline}”
+                {ev.news_url && <div className="chart-tooltip-news-hint">click the shaded area to read</div>}
+              </div>
+            )}
           </div>
         )
       })}
@@ -137,7 +143,7 @@ export default function SalaryChart({ points, from, to, displayCurrency, events 
         x1 = Math.max(domainFrom, mid - minWidth / 2)
         x2 = Math.min(domainTo, mid + minWidth / 2)
       }
-      return { key: `band-${i}`, x1, x2, drop: ev.percent_change < 0 }
+      return { key: `band-${i}`, x1, x2, drop: ev.percent_change < 0, newsUrl: ev.news_url || null }
     })
     .filter(Boolean)
 
@@ -166,6 +172,16 @@ export default function SalaryChart({ points, from, to, displayCurrency, events 
             key={b.key} x1={b.x1} x2={b.x2}
             fill={b.drop ? '#d70015' : '#248a3d'} fillOpacity={0.09}
             stroke={b.drop ? '#d70015' : '#248a3d'} strokeOpacity={0.25}
+            // Bands with a news article open it on click.
+            shape={(props) => (
+              <rect
+                x={props.x} y={props.y} width={props.width} height={props.height}
+                fill={b.drop ? '#d70015' : '#248a3d'} fillOpacity={0.09}
+                stroke={b.drop ? '#d70015' : '#248a3d'} strokeOpacity={0.25}
+                style={b.newsUrl ? { cursor: 'pointer' } : undefined}
+                onClick={b.newsUrl ? () => window.open(b.newsUrl, '_blank', 'noopener') : undefined}
+              />
+            )}
           />
         ))}
         <Tooltip
