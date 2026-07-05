@@ -235,6 +235,7 @@ body {
 .chart-tooltip-note { color: #0071e3; margin-top: 7px; font-style: italic; }
 .chart-tooltip-note.muted { color: #86868b; font-style: normal; }
 .chart-tooltip-target { color: #b25000; margin-top: 2px; font-size: 12px; }
+.chart-tooltip-target-detail { color: #a1a1a6; font-size: 11px; margin-top: 1px; }
 
 .chart-tooltip-event {
   margin-top: 8px;

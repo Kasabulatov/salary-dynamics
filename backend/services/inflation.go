@@ -23,11 +23,12 @@ type InflationStore interface {
 
 // InflationTarget is the response payload for the target line.
 type InflationTarget struct {
-	Points      []SeriesPoint `json:"points"`
-	CountryCode string        `json:"country_code"`
-	BaseAmount  float64       `json:"base_amount"`
-	BaseCcy     string        `json:"base_currency"`
-	BaseDate    string        `json:"base_date"`
+	Points      []SeriesPoint   `json:"points"`
+	CountryCode string          `json:"country_code"`
+	BaseAmount  float64         `json:"base_amount"`
+	BaseCcy     string          `json:"base_currency"`
+	BaseDate    string          `json:"base_date"`
+	Rates       map[int]float64 `json:"rates"` // year -> annual CPI %, for tooltips
 }
 
 // EnsureInflation makes sure CPI data for the country is cached. force=true
@@ -87,6 +88,15 @@ func BuildInflationTarget(ctx context.Context, store InflationStore, wb CPIFetch
 	rates, err := store.GetInflationRates(ctx, country)
 	if err != nil {
 		return res, err
+	}
+
+	// Expose the annual rates relevant to this window (baseline year onward)
+	// so the frontend tooltip can show which CPI was applied.
+	res.Rates = map[int]float64{}
+	for year, rate := range rates {
+		if year >= base.EffectiveDate.Year()-1 && year <= to.Year() {
+			res.Rates[year] = rate
+		}
 	}
 
 	// Clamp the window: nothing before the baseline entry, nothing after today.

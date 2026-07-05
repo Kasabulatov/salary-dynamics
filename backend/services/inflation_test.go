@@ -78,6 +78,9 @@ func TestInflationTargetStepsOnJan1(t *testing.T) {
 	if target.CountryCode != "US" || target.BaseCcy != "USD" {
 		t.Errorf("meta = %s/%s, want US/USD", target.CountryCode, target.BaseCcy)
 	}
+	if target.Rates[2023] != 10 || target.Rates[2024] != 5 {
+		t.Errorf("rates = %v, want 2023:10 2024:5 (for tooltips)", target.Rates)
+	}
 
 	// Flat at 1000 through 2023; ×1.10 from Jan 1 2024; ×1.155 from Jan 1 2025.
 	if v := valueOn(t, target.Points, "2023-06-01"); v != 1000 {

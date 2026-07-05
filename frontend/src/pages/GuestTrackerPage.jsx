@@ -108,7 +108,8 @@ export default function GuestTrackerPage() {
             {computed && !busy && (
               <>
                 <SalaryChart points={points} from={from} to={to}
-                  displayCurrency={displayCurrency} events={computed.events} />
+                  displayCurrency={displayCurrency} events={computed.events}
+                  inflationMeta={showInflation ? computed.inflation : null} />
                 <div className="chart-legend">
                   <span><span className="legend-dot" /> salary change</span>
                   <span><span className="legend-band red" /> sharp drop</span>

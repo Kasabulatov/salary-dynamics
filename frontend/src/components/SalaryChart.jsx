@@ -20,11 +20,33 @@ function EntryDot({ cx, cy, payload }) {
 
 const windowLabel = { daily: 'in one day', weekly: 'over a week' }
 
-function ChartTooltip({ active, payload, displayCurrency, coveringEvents, valueByTs }) {
+// Which annual CPI is in effect on the hovered day, and the cumulative
+// inflation applied since the baseline (mirrors the backend's Jan-1 steps).
+function inflationInfo(ts, meta) {
+  if (!meta?.rates) return null
+  const hoverYear = new Date(ts).getUTCFullYear()
+  const baseYear = new Date(meta.base_date + 'T00:00:00Z').getUTCFullYear()
+  const appliedYear = hoverYear - 1
+  const applied = appliedYear >= baseYear ? meta.rates[appliedYear] : undefined
+  let cumulative = 1
+  for (let y = baseYear; y <= hoverYear - 1; y++) {
+    if (meta.rates[y] != null) cumulative *= 1 + meta.rates[y] / 100
+  }
+  return {
+    appliedYear,
+    applied,
+    cumulativePct: (cumulative - 1) * 100,
+    country: meta.country_code,
+    baseYear,
+  }
+}
+
+function ChartTooltip({ active, payload, displayCurrency, coveringEvents, valueByTs, inflationMeta }) {
   if (!active || !payload?.length) return null
   const p = payload[0].payload
   const e = p.entry
   const events = coveringEvents(p.ts)
+  const inf = p.target != null ? inflationInfo(p.ts, inflationMeta) : null
   return (
     <div className="chart-tooltip">
       <div className="chart-tooltip-date">{fmtDate(p.ts)}</div>
@@ -32,6 +54,15 @@ function ChartTooltip({ active, payload, displayCurrency, coveringEvents, valueB
       {p.target != null && (
         <div className="chart-tooltip-target">
           inflation target: {fmtMoney(p.target, displayCurrency)}
+          {inf && (
+            <div className="chart-tooltip-target-detail">
+              {inf.applied != null
+                ? `${inf.country} CPI ${inf.appliedYear}: ${inf.applied >= 0 ? '+' : ''}${inf.applied.toFixed(1)}%`
+                : `no inflation applied yet`}
+              {inf.cumulativePct > 0 &&
+                ` · since ${inf.baseYear}: +${inf.cumulativePct.toFixed(1)}%`}
+            </div>
+          )}
         </div>
       )}
       {e && e.currency_code !== displayCurrency && (
@@ -71,7 +102,7 @@ function ChartTooltip({ active, payload, displayCurrency, coveringEvents, valueB
   )
 }
 
-export default function SalaryChart({ points, from, to, displayCurrency, events = [] }) {
+export default function SalaryChart({ points, from, to, displayCurrency, events = [], inflationMeta = null }) {
   if (!points.length) {
     return <div className="chart-empty">No salary entries in this period.</div>
   }
@@ -143,6 +174,7 @@ export default function SalaryChart({ points, from, to, displayCurrency, events 
               displayCurrency={displayCurrency}
               coveringEvents={coveringEvents}
               valueByTs={valueByTs}
+              inflationMeta={inflationMeta}
             />
           }
         />

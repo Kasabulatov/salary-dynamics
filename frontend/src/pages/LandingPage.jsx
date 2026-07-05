@@ -60,6 +60,7 @@ export default function LandingPage() {
                   to={new Date()}
                   displayCurrency="USD"
                   events={demo.events}
+                  inflationMeta={demo.inflation}
                 />
                 <div className="chart-legend">
                   <span><span className="legend-dot" /> salary change</span>

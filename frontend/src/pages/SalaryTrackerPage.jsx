@@ -191,6 +191,7 @@ export default function SalaryTrackerPage() {
                 <SalaryChart
                   points={points} from={from} to={to}
                   displayCurrency={displayCurrency} events={fxEvents}
+                  inflationMeta={showInflation ? inflationQ.data : null}
                 />
                 <div className="chart-legend">
                   <span><span className="legend-dot" /> salary change</span>
