@@ -12,7 +12,7 @@ test.describe('guest mode', () => {
     // Add a guest entry (sessionStorage only).
     await page.getByPlaceholder('650 000').fill('3000')
     await page.getByLabel('Salary Currency').selectOption('USD')
-    await page.getByPlaceholder('2024-06-01 or 01.06.2024').fill('2024-02-01')
+    await page.getByPlaceholder('YYYY-MM-DD').fill('2024-02-01')
     await page.getByRole('button', { name: 'Add', exact: true }).click()
     await expect(page.locator('.entries-table tbody tr')).toHaveCount(1)
 
