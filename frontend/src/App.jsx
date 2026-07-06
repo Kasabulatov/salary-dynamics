@@ -29,8 +29,8 @@ function Nav() {
     return (
       <nav className="nav">
         <div className="nav-inner">
-          <Link to="/welcome" className="nav-brand nav-brand-link">Dynamics</Link>
-          <Link to="/">Salary Tracker</Link>
+          <Link to="/welcome" className="nav-brand nav-brand-link">Info</Link>
+          <Link to="/">Salary Dynamics</Link>
           <Link to="/compare">Offer Compare</Link>
           <span className="nav-spacer" />
           <span className="nav-user">{user.email}</span>
@@ -44,7 +44,8 @@ function Nav() {
   return (
     <nav className="nav">
       <div className="nav-inner">
-        <Link to="/" className="nav-brand nav-brand-link">Dynamics</Link>
+        <Link to="/" className="nav-brand nav-brand-link">Info</Link>
+        <Link to="/try">Salary Dynamics</Link>
         <Link to="/compare">Offer Compare</Link>
         {location.pathname === '/try' && <span className="nav-guest-chip">Guest mode</span>}
         <span className="nav-spacer" />

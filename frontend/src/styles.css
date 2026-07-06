@@ -45,12 +45,14 @@ body {
   font-size: 12px;
   letter-spacing: -0.01em;
 }
-.nav a {
+.nav a:not(.nav-cta) {
   color: rgba(29, 29, 31, 0.8);
   text-decoration: none;
-  transition: color 0.2s ease;
+  padding: 4px 10px;
+  border-radius: 8px;
+  transition: background 0.15s ease, color 0.15s ease;
 }
-.nav a:hover { color: #1d1d1f; }
+.nav a:not(.nav-cta):hover { background: #e8e8ed; color: #1d1d1f; }
 .nav-disabled { color: rgba(29, 29, 31, 0.35); cursor: default; }
 .nav-spacer { flex: 1; }
 .nav-user { color: rgba(29, 29, 31, 0.5); }
