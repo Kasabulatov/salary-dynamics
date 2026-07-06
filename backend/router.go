@@ -77,6 +77,8 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(httprate.LimitByIP(20, time.Minute))
 		r.Post("/api/public/compute", public.Compute)
+		r.Post("/api/public/compare", public.Compare)
+		r.Get("/api/public/compare/meta", public.CompareMeta)
 	})
 
 	// Protected routes: valid JWT cookie + CSRF header on writes.
