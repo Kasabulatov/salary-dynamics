@@ -37,7 +37,16 @@ build, e2e, govulncheck + npm audit), Render deploys gated on CI green
 (autoDeployTrigger: checksPass), Dependabot weekly, §5.2 audit fixes (1 MiB
 body cap, bcrypt 72-char password cap, Referrer-Policy header).
 
+**Offer Comparison (July 6, 2026, branch `feature/offer-comparison`):** guest
+`/compare` page per `feature_offer_comparison.md` — `POST /api/public/compare`
+(today's rate via existing Converter, stateless, 20/min tier), embedded
+`cost_of_living.json` (36 cities, city→country→FX-only fallback), pre-filled
+auto-run example, Recharts two-bar result, watermarked share-PNG (zero-dep
+SVG→canvas), 4 Metrica goals (fire-only). Owner must add the 4 goals in
+Metrica settings on ship.
+
 **Next up:**
+- ⏭ follow-up (deferred from Offer Comparison PR): share-image button on the salary-tracker chart
 - ⏭ optional: CSP header on the frontend (needs Metrica allowances) · repo public decision
 
 **Run locally:** `docker compose up -d` → http://localhost:5173 (local test account: test@example.com / password123)

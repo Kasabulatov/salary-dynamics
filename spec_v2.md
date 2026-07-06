@@ -57,7 +57,14 @@ IT specialists, data analysts, and product managers who need a simple, unified d
 - **(v2)** As a user, I want a special icon (⚡) on the chart on days when the exchange rate between my Salary and Display currencies experienced a significant change (**> 2% daily or weekly**). Hovering shows the change percentage and the absolute rate change.
 - **(v3)** As a user, I want that same tooltip to optionally include a relevant news headline for the event day.
 
-### 2.4 User Stories: Product Metrics Dashboard (v4)
+### 2.4 User Stories: Offer Comparison ("What-If")
+- As a visitor (no account needed), I want to enter my current salary (amount, currency, optional city) and a job offer (amount, currency, optional city), and see which is worth more — **by today's exchange rate** and **adjusted for cost of living** — with a plain-language verdict.
+- As a visitor, I want the page pre-filled with a working example so I see a result before typing anything.
+- As a visitor, I want to download a shareable image of the result (watermarked with the site URL).
+
+> Rates: **today's** (latest cached) rate — a forward-looking decision, unlike the tracker's rate-on-effective-date above. Cost of living: the committed `cost_of_living.json` (NYC = 100, approximate, embedded via Go `embed`; city → currency-derived country → FX-only fallback). Full details: `feature_offer_comparison.md`.
+
+### 2.5 User Stories: Product Metrics Dashboard (v4)
 - As a user, I want to securely connect my Google Analytics and Yandex Metrica accounts using OAuth, granting read-only access.
 - As a user, I want to select a connected account and property to view its data.
 - As a user, I want to see key metrics (Users, Sessions, Pageviews) on a line chart over a selected time period.
