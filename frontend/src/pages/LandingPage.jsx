@@ -26,18 +26,26 @@ const COMPARE_DEMO = {
 export default function LandingPage() {
   const { user } = useAuth()
   const today = new Date().toISOString().slice(0, 10)
+  // Self-healing demo queries: retry transient failures with backoff and
+  // refetch on tab focus after an error — a blip must never freeze the demo.
   const demoQ = useQuery({
     queryKey: ['landing-demo'],
     queryFn: () => publicCompute({
       entries: DEMO_ENTRIES, displayCurrency: 'USD', from: DEMO_FROM, to: today,
     }),
     staleTime: Infinity,
+    retry: 2,
+    retryDelay: (attempt) => 1500 * (attempt + 1),
+    refetchOnWindowFocus: (query) => query.state.status === 'error',
   })
 
   const compareDemoQ = useQuery({
     queryKey: ['landing-compare-demo'],
     queryFn: () => api('/api/public/compare', { method: 'POST', body: COMPARE_DEMO }),
     staleTime: Infinity,
+    retry: 2,
+    retryDelay: (attempt) => 1500 * (attempt + 1),
+    refetchOnWindowFocus: (query) => query.state.status === 'error',
   })
 
   const demo = demoQ.data
