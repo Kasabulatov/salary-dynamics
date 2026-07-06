@@ -17,8 +17,12 @@ services:
         generateValue: true
       - key: REFRESH_SECRET
         generateValue: true
-      - key: CORS_ORIGIN # updated to the real Vercel URL after frontend deploy
-        value: https://placeholder.vercel.app
+      # Dashboard-managed (like DATABASE_URL): set to the real Vercel URL in
+      # Render's Environment tab. MUST be sync:false — a hardcoded value here
+      # gets re-synced to the blueprint on every deploy, silently reverting
+      # the real origin and breaking CORS ("Failed to fetch" on the site).
+      - key: CORS_ORIGIN
+        sync: false
       - key: COOKIE_SECURE
         value: "true"
       - key: COOKIE_SAMESITE # Vercel <-> Render is cross-site: None + Secure required
