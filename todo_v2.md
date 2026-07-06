@@ -45,6 +45,9 @@ auto-run example, Recharts two-bar result, watermarked share-PNG (zero-dep
 SVG→canvas), 4 Metrica goals (fire-only). Owner must add the 4 goals in
 Metrica settings on ship.
 
+Also on this branch: Feedback nav link (guest + logged-in) → Google Form
+(forms.gle/A9kN2tPradKXNRkt5, new tab, noopener) with `feedback_click` goal.
+
 **Next up:**
 - ⏭ follow-up (deferred from Offer Comparison PR): share-image button on the salary-tracker chart
 - ⏭ optional: CSP header on the frontend (needs Metrica allowances) · repo public decision

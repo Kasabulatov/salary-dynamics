@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from './AuthContext'
+import { track } from './analytics'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
@@ -32,6 +33,10 @@ function Nav() {
           <Link to="/welcome" className="nav-brand nav-brand-link">Info</Link>
           <Link to="/">Salary Dynamics</Link>
           <Link to="/compare">Offer Compare</Link>
+          <a href="https://forms.gle/A9kN2tPradKXNRkt5" target="_blank"
+            rel="noopener noreferrer" onClick={() => track('feedback_click', {})}>
+            Feedback
+          </a>
           <span className="nav-spacer" />
           <span className="nav-user">{user.email}</span>
           <button className="nav-link-btn" onClick={logout}>Sign out</button>
@@ -47,6 +52,10 @@ function Nav() {
         <Link to="/" className="nav-brand nav-brand-link">Info</Link>
         <Link to="/try">Salary Dynamics</Link>
         <Link to="/compare">Offer Compare</Link>
+        <a href="https://forms.gle/A9kN2tPradKXNRkt5" target="_blank"
+            rel="noopener noreferrer" onClick={() => track('feedback_click', {})}>
+            Feedback
+          </a>
         {location.pathname === '/try' && <span className="nav-guest-chip">Guest mode</span>}
         <span className="nav-spacer" />
         <Link to="/login">Sign in</Link>
