@@ -3,8 +3,10 @@ import { useQuery } from '@tanstack/react-query'
 import { publicCompute } from '../api'
 import { track } from '../analytics'
 import { useAuth } from '../AuthContext'
+import { api } from '../api'
 import { buildChartPoints, targetMapFrom } from '../chartData'
 import SalaryChart from '../components/SalaryChart'
+import CompareChart from '../components/CompareChart'
 
 // Fictional example data for the live demo (KZT salary with two raises —
 // long enough to show event bands and the inflation line).
@@ -15,6 +17,12 @@ const DEMO_ENTRIES = [
   { amount: 900000, currency_code: 'KZT', effective_date: '2025-04-01', note: 'senior role' },
 ]
 
+const COMPARE_DEMO = {
+  current: { amount: 800000, currency: 'KZT', city: 'Almaty' },
+  offer: { amount: 3500, currency: 'EUR', city: 'Lisbon' },
+  displayCurrency: 'USD',
+}
+
 export default function LandingPage() {
   const { user } = useAuth()
   const today = new Date().toISOString().slice(0, 10)
@@ -23,6 +31,12 @@ export default function LandingPage() {
     queryFn: () => publicCompute({
       entries: DEMO_ENTRIES, displayCurrency: 'USD', from: DEMO_FROM, to: today,
     }),
+    staleTime: Infinity,
+  })
+
+  const compareDemoQ = useQuery({
+    queryKey: ['landing-compare-demo'],
+    queryFn: () => api('/api/public/compare', { method: 'POST', body: COMPARE_DEMO }),
     staleTime: Infinity,
   })
 
@@ -36,8 +50,8 @@ export default function LandingPage() {
       <header className="hero">
         <h1>Your salary. In real terms.</h1>
         <p className="hero-sub">
-          See what your pay is really worth — converted at the exchange rate of{' '}
-          <em>every single day</em>, measured against inflation.
+          Track what your pay is really worth, day by day — and put any job
+          offer next to it, honestly.
         </p>
         <div className="hero-ctas">
           {user ? (
@@ -55,11 +69,25 @@ export default function LandingPage() {
             </>
           )}
         </div>
-        <p className="hero-secondary-cta">
-          Comparing a job offer in another currency?{' '}
-          <Link to="/compare">Try the Offer Comparison →</Link>
-        </p>
       </header>
+
+      {/* Two products, equal billing (Apple dual-tile pattern). */}
+      <section className="section product-tiles-section">
+        <div className="section-inner">
+          <div className="product-tiles">
+            <Link to={user ? '/' : '/try'} className="product-tile">
+              <h3>Salary Dynamics</h3>
+              <p>Your salary's true value, every single day — with inflation as the honest benchmark.</p>
+              <span className="product-tile-cta">Open →</span>
+            </Link>
+            <Link to="/compare" className="product-tile">
+              <h3>Offer Comparison</h3>
+              <p>Current salary vs the offer — by exchange rate, and by what the money really buys.</p>
+              <span className="product-tile-cta">Compare →</span>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <section className="section section-alt">
         <div className="section-inner">
@@ -136,6 +164,15 @@ export default function LandingPage() {
             purchasing power</em> (cost-of-living adjusted). No account needed,
             and you can download the result as an image to share.
           </p>
+          {compareDemoQ.data && (
+            <div className="chart-panel landing-compare-demo">
+              <p className="compare-verdict">{compareDemoQ.data.verdict}</p>
+              <p className="landing-demo-caption">
+                Live example: 800 000 KZT in Almaty vs a 3 500 EUR offer in Lisbon — today's real rates.
+              </p>
+              <CompareChart result={compareDemoQ.data} />
+            </div>
+          )}
           <div className="hero-ctas">
             <Link to="/compare" className="btn btn-primary btn-large">Compare an offer</Link>
           </div>

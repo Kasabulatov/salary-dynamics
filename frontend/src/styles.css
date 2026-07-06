@@ -637,6 +637,47 @@ select {
   .compare-vs { padding: 2px 0; }
 }
 
+/* Apple dual-tile product pattern under the hero. */
+.product-tiles-section { padding-top: 0; }
+.product-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.product-tile {
+  display: block;
+  background: #f5f5f7;
+  border-radius: 18px;
+  padding: 34px 30px;
+  text-decoration: none;
+  color: #1d1d1f;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.product-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+.product-tile h3 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.product-tile p { margin: 0 0 14px; color: #6e6e73; font-size: 15px; line-height: 1.5; }
+.product-tile-cta { color: #0066cc; font-size: 15px; font-weight: 500; }
+@media (max-width: 720px) {
+  .product-tiles { grid-template-columns: 1fr; }
+}
+
+.landing-compare-demo { margin-bottom: 24px; }
+.landing-demo-caption {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: 13px;
+  color: #86868b;
+}
+
 .citypicker { position: relative; }
 .citypicker input { width: 100%; }
 .citypicker-list {
