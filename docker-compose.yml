@@ -30,6 +30,7 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       AUTH_RATE_PER_MIN: ${AUTH_RATE_PER_MIN:-100} # E2E registers many users; prod (Render) keeps 10
+      GLOBAL_RATE_PER_MIN: ${GLOBAL_RATE_PER_MIN:-600} # repeated E2E runs share one window; prod keeps 120
       PORT: "8080"
     ports:
       - "8080:8080"

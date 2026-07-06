@@ -9,9 +9,10 @@ test.describe('offer comparison', () => {
     await page.goto('/compare')
 
     // The example is pre-filled before any typing (payoff-before-effort).
+    // AmountInput groups digits with U+202F (narrow no-break space).
     const amounts = page.getByPlaceholder('650 000')
-    await expect(amounts.first()).toHaveValue('800 000')
-    await expect(amounts.nth(1)).toHaveValue('3 500')
+    await expect(amounts.first()).toHaveValue(/^800[\s ]000$/)
+    await expect(amounts.nth(1)).toHaveValue(/^3[\s ]500$/)
 
     // Deterministic comparison: same currency, both cities in the dataset.
     await amounts.first().fill('3400')
@@ -28,8 +29,9 @@ test.describe('offer comparison', () => {
     await expect(verdict).toContainText('about 62% more by exchange rate')
     await expect(verdict).toContainText('about the same in real purchasing power')
 
-    // Bars for both groups render.
-    await expect(page.locator('.recharts-surface')).toBeVisible()
+    // Bars for both groups render (.first(): the legend adds tiny SVGs
+    // that also carry .recharts-surface).
+    await expect(page.locator('.recharts-surface').first()).toBeVisible()
 
     // Change one amount, re-run: the verdict must update.
     await amounts.nth(1).fill('8000')

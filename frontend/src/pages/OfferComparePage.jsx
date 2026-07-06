@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { api } from '../api'
 import { track } from '../analytics'
 import { CURRENCIES } from '../currencies'
@@ -54,7 +54,11 @@ const fmt = (v) => Number(v).toLocaleString(undefined, { maximumFractionDigits: 
 
 export default function OfferComparePage() {
   const [inputs, setInputs] = useState(loadInputs)
-  const [result, setResult] = useState(null)
+  // The submitted payload IS the query key: the initial value auto-runs the
+  // pre-filled example on first load (payoff before effort), clicking
+  // Compare submits a new key, and React Query guarantees latest-wins,
+  // dedupes StrictMode double-fetches, and caches repeat comparisons.
+  const [submitted, setSubmitted] = useState(loadInputs)
   const chartRef = useRef(null)
 
   const metaQ = useQuery({
@@ -63,33 +67,33 @@ export default function OfferComparePage() {
     staleTime: Infinity,
   })
 
-  const compareMut = useMutation({
-    mutationFn: (payload) => api('/api/public/compare', {
+  const compareQ = useQuery({
+    queryKey: ['compare', submitted],
+    queryFn: () => api('/api/public/compare', {
       method: 'POST',
       body: {
-        current: { ...payload.current, amount: Number(payload.current.amount) },
-        offer: { ...payload.offer, amount: Number(payload.offer.amount) },
-        displayCurrency: payload.displayCurrency,
+        current: { ...submitted.current, amount: Number(submitted.current.amount) },
+        offer: { ...submitted.offer, amount: Number(submitted.offer.amount) },
+        displayCurrency: submitted.displayCurrency,
       },
     }),
-    onSuccess: (data, payload) => {
-      setResult(data)
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-      track('compare_run', {})
-      if (!data.real.available) track('compare_city_unknown', {})
-    },
+    staleTime: Infinity,
+    retry: 1,
   })
+  const result = compareQ.data ?? null
 
-  // Payoff before effort: auto-run once on first load with the (restored or
-  // default) inputs, so the page never starts empty.
-  const autoRan = useRef(false)
   useEffect(() => {
-    if (autoRan.current) return
-    autoRan.current = true
     track('compare_page_view', {})
-    compareMut.mutate(loadInputs())
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Per successful comparison: persist the inputs, fire the funnel goals.
+  useEffect(() => {
+    if (!compareQ.data) return
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(submitted))
+    track('compare_run', {})
+    if (!compareQ.data.real.available) track('compare_city_unknown', {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [compareQ.dataUpdatedAt])
 
   const runnable = Number(inputs.current.amount) > 0 && Number(inputs.offer.amount) > 0
 
@@ -136,14 +140,14 @@ export default function OfferComparePage() {
                 {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </label>
-            <button className="btn btn-primary btn-large" disabled={!runnable || compareMut.isPending}
-              onClick={() => compareMut.mutate(inputs)}>
-              {compareMut.isPending ? 'Comparing…' : 'Compare'}
+            <button className="btn btn-primary btn-large" disabled={!runnable || compareQ.isFetching}
+              onClick={() => setSubmitted(structuredClone(inputs))}>
+              {compareQ.isFetching ? 'Comparing…' : 'Compare'}
             </button>
           </div>
 
-          {compareMut.isError && (
-            <div className="form-error compare-error">{compareMut.error.message}</div>
+          {compareQ.isError && (
+            <div className="form-error compare-error">{compareQ.error.message}</div>
           )}
 
           {result && (
