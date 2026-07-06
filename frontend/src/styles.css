@@ -551,6 +551,82 @@ select {
   margin-right: 6px;
 }
 
+/* ————— Offer Comparison ————— */
+.hero-secondary-cta { margin-top: 22px; font-size: 15px; color: #6e6e73; }
+.hero-secondary-cta a { color: #0066cc; text-decoration: none; font-weight: 500; }
+.hero-secondary-cta a:hover { text-decoration: underline; }
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 18px;
+  align-items: stretch;
+  margin-bottom: 20px;
+}
+.compare-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+.compare-card h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.compare-vs {
+  align-self: center;
+  color: #86868b;
+  font-size: 15px;
+  font-weight: 600;
+}
+.compare-toolbar { margin-bottom: 20px; }
+.compare-display {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #6e6e73;
+}
+.compare-error { max-width: 640px; margin: 0 auto 20px; }
+.compare-result { padding: 28px 24px 18px; }
+.compare-verdict {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: clamp(19px, 2.6vw, 24px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.compare-summary {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: #6e6e73;
+  margin-bottom: 12px;
+}
+.compare-summary strong { color: #1d1d1f; }
+.compare-actions { display: flex; justify-content: center; padding: 14px 0 4px; }
+.compare-notes {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: center;
+  font-size: 12px;
+  color: #a1a1a6;
+}
+.compare-notes li { margin-top: 2px; }
+
+@media (max-width: 720px) {
+  .compare-grid { grid-template-columns: 1fr; }
+  .compare-vs { padding: 2px 0; }
+}
+
 /* ————— Footer ————— */
 .footer {
   padding: 28px 22px 40px;

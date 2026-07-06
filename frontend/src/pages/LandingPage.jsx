@@ -47,6 +47,10 @@ export default function LandingPage() {
             Create account
           </Link>
         </div>
+        <p className="hero-secondary-cta">
+          Comparing a job offer in another currency?{' '}
+          <Link to="/compare">Try the Offer Comparison →</Link>
+        </p>
       </header>
 
       <section className="section section-alt">

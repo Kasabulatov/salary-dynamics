@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import SalaryTrackerPage from './pages/SalaryTrackerPage'
 import GuestTrackerPage from './pages/GuestTrackerPage'
+import OfferComparePage from './pages/OfferComparePage'
 import MetricaTag from './components/MetricaTag'
 
 function Home() {
@@ -30,6 +31,7 @@ function Nav() {
         <div className="nav-inner">
           <span className="nav-brand">Dynamics</span>
           <Link to="/">Salary Tracker</Link>
+          <Link to="/compare">Offer Compare</Link>
           <span className="nav-spacer" />
           <span className="nav-user">{user.email}</span>
           <button className="nav-link-btn" onClick={logout}>Sign out</button>
@@ -43,6 +45,7 @@ function Nav() {
     <nav className="nav">
       <div className="nav-inner">
         <Link to="/" className="nav-brand nav-brand-link">Dynamics</Link>
+        <Link to="/compare">Offer Compare</Link>
         {location.pathname === '/try' && <span className="nav-guest-chip">Guest mode</span>}
         <span className="nav-spacer" />
         <Link to="/login">Sign in</Link>
@@ -72,6 +75,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/try" element={<GuestOnly><GuestTrackerPage /></GuestOnly>} />
+        <Route path="/compare" element={<OfferComparePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
