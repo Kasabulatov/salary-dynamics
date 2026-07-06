@@ -27,6 +27,22 @@ export async function api(path, { method = 'GET', body } = {}) {
   return data
 }
 
+// Retry policy for the public compute/compare queries. A momentary 429
+// (shared-NAT burst, or heavy interaction) should self-heal — httprate uses
+// a rolling window, so waiting a few seconds frees capacity. Client input
+// errors (400/404) never retry; 429 and 5xx retry up to 3 times.
+export const computeRetry = {
+  retry: (failureCount, error) => {
+    const s = error?.status
+    if (s && s >= 400 && s < 500 && s !== 429) return false
+    return failureCount < 3
+  },
+  retryDelay: (attempt, error) => (error?.status === 429 ? 4000 : 800 * (attempt + 1)),
+}
+
+// rateLimited reports whether an error is a 429 (for friendlier UI copy).
+export const rateLimited = (error) => error?.status === 429
+
 // publicCompute: stateless computation for guest mode and the landing demo.
 // Entries travel in the request; the server stores nothing.
 export function publicCompute({ entries, displayCurrency, from, to }) {

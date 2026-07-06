@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { api } from '../api'
+import { api, computeRetry, rateLimited } from '../api'
 import { track } from '../analytics'
 import { CURRENCIES } from '../currencies'
 import AmountInput from '../components/AmountInput'
@@ -78,7 +78,7 @@ export default function OfferComparePage() {
       },
     }),
     staleTime: Infinity,
-    retry: 1,
+    ...computeRetry,
   })
   const result = compareQ.data ?? null
 
@@ -143,7 +143,11 @@ export default function OfferComparePage() {
           </div>
 
           {compareQ.isError && (
-            <div className="form-error compare-error">{compareQ.error.message}</div>
+            <div className="form-error compare-error">
+              {rateLimited(compareQ.error)
+                ? 'A lot of requests just now — wait a few seconds and press Compare again.'
+                : compareQ.error.message}
+            </div>
           )}
 
           {result && (

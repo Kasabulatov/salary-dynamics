@@ -78,7 +78,7 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 	// nothing is persisted from these requests.
 	public := &handlers.PublicHandler{Store: store, Converter: converter, WB: wb, Frank: frank, NBK: nbk}
 	r.Group(func(r chi.Router) {
-		r.Use(httprate.LimitByIP(20, time.Minute))
+		r.Use(httprate.LimitByIP(cfg.PublicRatePerMin, time.Minute))
 		r.Post("/api/public/compute", public.Compute)
 		r.Post("/api/public/compare", public.Compare)
 		r.Get("/api/public/compare/meta", public.CompareMeta)

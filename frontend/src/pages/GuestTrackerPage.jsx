@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { publicCompute } from '../api'
+import { publicCompute, computeRetry, rateLimited } from '../api'
 import { buildChartPoints, targetMapFrom } from '../chartData'
 import { getGuestEntries, addGuestEntry, updateGuestEntry, deleteGuestEntry } from '../guestStore'
 import { track } from '../analytics'
@@ -37,6 +37,7 @@ export default function GuestTrackerPage() {
       displayCurrency, from: isoFrom, to: isoTo,
     }),
     enabled: entries.length > 0,
+    ...computeRetry,
   })
 
   const computed = computeQ.data
@@ -102,7 +103,9 @@ export default function GuestTrackerPage() {
             {busy && <div className="chart-empty">Computing with real historical rates…</div>}
             {computeQ.isError && (
               <div className="chart-empty">
-                Could not compute right now.{' '}
+                {rateLimited(computeQ.error)
+                  ? 'A lot of requests just now — wait a few seconds. '
+                  : 'Could not compute right now. '}
                 <button className="btn btn-primary" onClick={() => computeQ.refetch()}>Try again</button>
               </div>
             )}

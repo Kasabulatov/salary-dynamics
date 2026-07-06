@@ -25,6 +25,13 @@ type Config struct {
 	// Global per-IP rate limit per minute (production default 120; raised in
 	// local/CI compose — repeated E2E runs share one rolling window).
 	GlobalRatePerMin int
+	// Public compute/compare rate limit per IP per minute. A guest makes
+	// NO other backend calls, so this is their effective ceiling: the old
+	// value of 20 was exhausted by ordinary interactive use (landing demos +
+	// per-entry recompute + compare runs), producing "Could not compute
+	// right now". Raised to 60; tune via PUBLIC_RATE_PER_MIN without a code
+	// change if a shared-NAT crowd needs more.
+	PublicRatePerMin int
 }
 
 func LoadConfig() Config {
@@ -39,6 +46,7 @@ func LoadConfig() Config {
 		MigrationsDir:  envOr("MIGRATIONS_DIR", "migrations"),
 		AuthRatePerMin:   10,
 		GlobalRatePerMin: 120,
+		PublicRatePerMin: 60,
 	}
 	if s := os.Getenv("AUTH_RATE_PER_MIN"); s != "" {
 		n, err := strconv.Atoi(s)
@@ -53,6 +61,13 @@ func LoadConfig() Config {
 			log.Fatalf("GLOBAL_RATE_PER_MIN must be a positive integer")
 		}
 		cfg.GlobalRatePerMin = n
+	}
+	if s := os.Getenv("PUBLIC_RATE_PER_MIN"); s != "" {
+		n, err := strconv.Atoi(s)
+		if err != nil || n < 1 {
+			log.Fatalf("PUBLIC_RATE_PER_MIN must be a positive integer")
+		}
+		cfg.PublicRatePerMin = n
 	}
 	return cfg
 }
