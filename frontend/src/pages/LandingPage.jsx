@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { publicCompute } from '../api'
+import { publicCompute, computeRetry } from '../api'
 import { track } from '../analytics'
 import { useAuth } from '../AuthContext'
 import { api } from '../api'
@@ -34,8 +34,7 @@ export default function LandingPage() {
       entries: DEMO_ENTRIES, displayCurrency: 'USD', from: DEMO_FROM, to: today,
     }),
     staleTime: Infinity,
-    retry: 2,
-    retryDelay: (attempt) => 1500 * (attempt + 1),
+    ...computeRetry,
     refetchOnWindowFocus: (query) => query.state.status === 'error',
   })
 
@@ -43,8 +42,7 @@ export default function LandingPage() {
     queryKey: ['landing-compare-demo'],
     queryFn: () => api('/api/public/compare', { method: 'POST', body: COMPARE_DEMO }),
     staleTime: Infinity,
-    retry: 2,
-    retryDelay: (attempt) => 1500 * (attempt + 1),
+    ...computeRetry,
     refetchOnWindowFocus: (query) => query.state.status === 'error',
   })
 
