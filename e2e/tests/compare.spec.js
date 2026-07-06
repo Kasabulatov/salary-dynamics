@@ -14,13 +14,20 @@ test.describe('offer comparison', () => {
     await expect(amounts.first()).toHaveValue(/^800[\s ]000$/)
     await expect(amounts.nth(1)).toHaveValue(/^3[\s ]500$/)
 
-    // Deterministic comparison: same currency, both cities in the dataset.
+    // Deterministic comparison: same currency, both cities picked from the
+    // searchable list (type to filter, click to select).
+    const pickCity = async (n, query, city) => {
+      const input = page.locator('.citypicker input').nth(n)
+      await input.click()
+      await input.fill(query)
+      await page.locator('.citypicker-list li', { hasText: city }).first().click()
+    }
     await amounts.first().fill('3400')
     await page.locator('.compare-card select').first().selectOption('USD')
-    await page.locator('.compare-card input[list="col-cities"]').first().fill('Almaty')
+    await pickCity(0, 'Alma', 'Almaty')
     await amounts.nth(1).fill('5500')
     await page.locator('.compare-card select').nth(1).selectOption('USD')
-    await page.locator('.compare-card input[list="col-cities"]').nth(1).fill('Lisbon')
+    await pickCity(1, 'Lisb', 'Lisbon')
     await page.getByRole('button', { name: 'Compare', exact: true }).click()
 
     // COL 34 vs 55 with equal real value (3400/.34 == 5500/.55 == 10000):

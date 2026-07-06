@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { publicCompute } from '../api'
 import { track } from '../analytics'
+import { useAuth } from '../AuthContext'
 import { buildChartPoints, targetMapFrom } from '../chartData'
 import SalaryChart from '../components/SalaryChart'
 
@@ -15,6 +16,7 @@ const DEMO_ENTRIES = [
 ]
 
 export default function LandingPage() {
+  const { user } = useAuth()
   const today = new Date().toISOString().slice(0, 10)
   const demoQ = useQuery({
     queryKey: ['landing-demo'],
@@ -38,14 +40,20 @@ export default function LandingPage() {
           <em>every single day</em>, measured against inflation.
         </p>
         <div className="hero-ctas">
-          <Link to="/try" className="btn btn-primary btn-large"
-            onClick={() => track('cta_try_clicked', { from: 'hero' })}>
-            Try it — no account needed
-          </Link>
-          <Link to="/register" className="btn btn-ghost btn-large"
-            onClick={() => track('cta_register_clicked', { from: 'hero' })}>
-            Create account
-          </Link>
+          {user ? (
+            <Link to="/" className="btn btn-primary btn-large">Open your Salary Tracker</Link>
+          ) : (
+            <>
+              <Link to="/try" className="btn btn-primary btn-large"
+                onClick={() => track('cta_try_clicked', { from: 'hero' })}>
+                Try it — no account needed
+              </Link>
+              <Link to="/register" className="btn btn-ghost btn-large"
+                onClick={() => track('cta_register_clicked', { from: 'hero' })}>
+                Create account
+              </Link>
+            </>
+          )}
         </div>
         <p className="hero-secondary-cta">
           Comparing a job offer in another currency?{' '}

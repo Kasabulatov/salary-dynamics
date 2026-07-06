@@ -4,6 +4,7 @@ import { api } from '../api'
 import { track } from '../analytics'
 import { CURRENCIES } from '../currencies'
 import AmountInput from '../components/AmountInput'
+import CityPicker from '../components/CityPicker'
 import CompareChart from '../components/CompareChart'
 import { downloadShareImage } from '../shareImage'
 
@@ -42,10 +43,9 @@ function SideCard({ title, side, onChange, cities }) {
       </label>
       <label>
         City <span className="muted">(optional, improves accuracy)</span>
-        <input type="text" value={side.city} list="col-cities" placeholder="e.g. Almaty"
-          onChange={(e) => onChange({ ...side, city: e.target.value })} />
+        <CityPicker value={side.city} cities={cities}
+          onChange={(city) => onChange({ ...side, city })} />
       </label>
-      {cities}
     </div>
   )
 }
@@ -118,17 +118,13 @@ export default function OfferComparePage() {
 
       <section className="section section-alt">
         <div className="section-inner">
-          <datalist id="col-cities">
-            {(metaQ.data?.cities ?? []).map((c) => (
-              <option key={`${c.city}-${c.country}`} value={c.city} />
-            ))}
-          </datalist>
-
           <div className="compare-grid">
             <SideCard title="Your current salary" side={inputs.current}
+              cities={metaQ.data?.cities}
               onChange={(current) => setInputs({ ...inputs, current })} />
             <div className="compare-vs">vs</div>
             <SideCard title="The offer" side={inputs.offer}
+              cities={metaQ.data?.cities}
               onChange={(offer) => setInputs({ ...inputs, offer })} />
           </div>
 

@@ -29,7 +29,7 @@ function Nav() {
     return (
       <nav className="nav">
         <div className="nav-inner">
-          <span className="nav-brand">Dynamics</span>
+          <Link to="/welcome" className="nav-brand nav-brand-link">Dynamics</Link>
           <Link to="/">Salary Tracker</Link>
           <Link to="/compare">Offer Compare</Link>
           <span className="nav-spacer" />
@@ -74,6 +74,7 @@ export default function App() {
       <Nav />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/welcome" element={<LandingPage />} />
         <Route path="/try" element={<GuestOnly><GuestTrackerPage /></GuestOnly>} />
         <Route path="/compare" element={<OfferComparePage />} />
         <Route path="/login" element={<LoginPage />} />
