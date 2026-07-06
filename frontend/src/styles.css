@@ -621,7 +621,15 @@ select {
   margin-bottom: 12px;
 }
 .compare-summary strong { color: #1d1d1f; }
-.compare-actions { display: flex; justify-content: center; padding: 14px 0 4px; }
+.compare-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0 4px;
+}
+.share-links { display: flex; gap: 8px; }
+.share-links .btn-mini { text-decoration: none; }
 .compare-notes {
   margin: 10px 0 0;
   padding: 0;

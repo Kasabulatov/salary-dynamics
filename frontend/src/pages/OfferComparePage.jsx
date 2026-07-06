@@ -6,7 +6,7 @@ import { CURRENCIES } from '../currencies'
 import AmountInput from '../components/AmountInput'
 import CityPicker from '../components/CityPicker'
 import CompareChart from '../components/CompareChart'
-import { downloadShareImage } from '../shareImage'
+import { shareResult, shareLinks } from '../shareImage'
 
 const STORAGE_KEY = 'compare_inputs'
 
@@ -100,7 +100,7 @@ export default function OfferComparePage() {
   const onShare = async () => {
     track('compare_result_shared', {})
     try {
-      await downloadShareImage({ chartContainer: chartRef.current, verdict: result.verdict })
+      await shareResult({ chartContainer: chartRef.current, verdict: result.verdict })
     } catch {
       alert('Could not create the image in this browser — try a screenshot instead.')
     }
@@ -168,6 +168,15 @@ export default function OfferComparePage() {
                 <button className="btn btn-primary" onClick={onShare}>
                   Share this result
                 </button>
+                <div className="share-links">
+                  {Object.entries(shareLinks(result.verdict)).map(([name, url]) => (
+                    <a key={name} href={url} target="_blank" rel="noopener noreferrer"
+                      className="btn btn-mini"
+                      onClick={() => track('compare_result_shared', {})}>
+                      {name === 'telegram' ? 'Telegram' : name === 'whatsapp' ? 'WhatsApp' : 'LinkedIn'}
+                    </a>
+                  ))}
+                </div>
               </div>
               <ul className="compare-notes">
                 {result.notes.map((n, i) => <li key={i}>{n}</li>)}

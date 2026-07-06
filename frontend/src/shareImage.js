@@ -41,9 +41,9 @@ async function svgToImage(svgEl) {
   return { img, width: rect.width, height: rect.height }
 }
 
-// downloadShareImage renders the result to a 1200x630 PNG (social-card size)
-// and triggers a download. chartContainer is the DOM node wrapping the chart.
-export async function downloadShareImage({ chartContainer, verdict }) {
+// createShareImageBlob renders the result to a 1200x630 PNG blob
+// (social-card size). chartContainer is the DOM node wrapping the chart.
+export async function createShareImageBlob({ chartContainer, verdict }) {
   const canvas = document.createElement('canvas')
   canvas.width = W
   canvas.height = H
@@ -88,11 +88,45 @@ export async function downloadShareImage({ chartContainer, verdict }) {
   const mark = `${SITE} · what is your salary really worth?`
   ctx.fillText(mark, W - 60 - ctx.measureText(mark).width, H - 36)
 
-  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
+  return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
+}
+
+// shareResult: native share sheet with the image attached (Telegram /
+// WhatsApp / LinkedIn appear as targets on devices that have them);
+// falls back to downloading the PNG where Web Share can't send files.
+export async function shareResult({ chartContainer, verdict }) {
+  const blob = await createShareImageBlob({ chartContainer, verdict })
+  const file = new File([blob], 'offer-comparison.png', { type: 'image/png' })
+
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        text: `${verdict} — via https://${SITE}/compare`,
+      })
+      return 'shared'
+    } catch (e) {
+      if (e.name === 'AbortError') return 'cancelled' // user closed the sheet
+      // fall through to download on real failures
+    }
+  }
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
   a.download = 'offer-comparison.png'
   a.click()
   URL.revokeObjectURL(url)
+  return 'downloaded'
+}
+
+// Text+link share URLs (these endpoints cannot carry an image — the image
+// path is the native sheet or the downloaded PNG).
+export function shareLinks(verdict) {
+  const link = `https://${SITE}/compare`
+  const text = encodeURIComponent(`${verdict} — see for yourself:`)
+  return {
+    telegram: `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`,
+    whatsapp: `https://wa.me/?text=${text}%20${encodeURIComponent(link)}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`,
+  }
 }
