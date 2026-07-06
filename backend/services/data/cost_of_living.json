@@ -1,0 +1,309 @@
+{
+  "updated": "2026-07-06",
+  "base": "New York City = 100",
+  "source_note": "Approximate cost-of-living indices, base = New York City = 100. Manually curated original estimates for guidance only — NOT precise figures. Update the values and the 'updated' date a few times a year.",
+  "cities": [
+    {
+      "city": "New York",
+      "country": "US",
+      "index": 100
+    },
+    {
+      "city": "San Francisco",
+      "country": "US",
+      "index": 96
+    },
+    {
+      "city": "London",
+      "country": "GB",
+      "index": 78
+    },
+    {
+      "city": "Amsterdam",
+      "country": "NL",
+      "index": 72
+    },
+    {
+      "city": "Dubai",
+      "country": "AE",
+      "index": 68
+    },
+    {
+      "city": "Berlin",
+      "country": "DE",
+      "index": 62
+    },
+    {
+      "city": "Munich",
+      "country": "DE",
+      "index": 66
+    },
+    {
+      "city": "Paris",
+      "country": "FR",
+      "index": 70
+    },
+    {
+      "city": "Madrid",
+      "country": "ES",
+      "index": 55
+    },
+    {
+      "city": "Barcelona",
+      "country": "ES",
+      "index": 57
+    },
+    {
+      "city": "Lisbon",
+      "country": "PT",
+      "index": 55
+    },
+    {
+      "city": "Porto",
+      "country": "PT",
+      "index": 48
+    },
+    {
+      "city": "Warsaw",
+      "country": "PL",
+      "index": 46
+    },
+    {
+      "city": "Prague",
+      "country": "CZ",
+      "index": 50
+    },
+    {
+      "city": "Belgrade",
+      "country": "RS",
+      "index": 40
+    },
+    {
+      "city": "Istanbul",
+      "country": "TR",
+      "index": 38
+    },
+    {
+      "city": "Tbilisi",
+      "country": "GE",
+      "index": 36
+    },
+    {
+      "city": "Yerevan",
+      "country": "AM",
+      "index": 37
+    },
+    {
+      "city": "Bangkok",
+      "country": "TH",
+      "index": 42
+    },
+    {
+      "city": "Kuala Lumpur",
+      "country": "MY",
+      "index": 38
+    },
+    {
+      "city": "Singapore",
+      "country": "SG",
+      "index": 82
+    },
+    {
+      "city": "Tokyo",
+      "country": "JP",
+      "index": 68
+    },
+    {
+      "city": "Almaty",
+      "country": "KZ",
+      "index": 34
+    },
+    {
+      "city": "Astana",
+      "country": "KZ",
+      "index": 33
+    },
+    {
+      "city": "Moscow",
+      "country": "RU",
+      "index": 45
+    },
+    {
+      "city": "Saint Petersburg",
+      "country": "RU",
+      "index": 41
+    },
+    {
+      "city": "Kyiv",
+      "country": "UA",
+      "index": 35
+    },
+    {
+      "city": "Tashkent",
+      "country": "UZ",
+      "index": 30
+    },
+    {
+      "city": "Bishkek",
+      "country": "KG",
+      "index": 31
+    },
+    {
+      "city": "Baku",
+      "country": "AZ",
+      "index": 38
+    },
+    {
+      "city": "Buenos Aires",
+      "country": "AR",
+      "index": 40
+    },
+    {
+      "city": "Mexico City",
+      "country": "MX",
+      "index": 44
+    },
+    {
+      "city": "Toronto",
+      "country": "CA",
+      "index": 74
+    },
+    {
+      "city": "Sydney",
+      "country": "AU",
+      "index": 80
+    },
+    {
+      "city": "Bengaluru",
+      "country": "IN",
+      "index": 32
+    },
+    {
+      "city": "Cairo",
+      "country": "EG",
+      "index": 28
+    }
+  ],
+  "countries": [
+    {
+      "country": "US",
+      "index": 88
+    },
+    {
+      "country": "GB",
+      "index": 72
+    },
+    {
+      "country": "NL",
+      "index": 70
+    },
+    {
+      "country": "AE",
+      "index": 64
+    },
+    {
+      "country": "DE",
+      "index": 62
+    },
+    {
+      "country": "FR",
+      "index": 66
+    },
+    {
+      "country": "ES",
+      "index": 54
+    },
+    {
+      "country": "PT",
+      "index": 50
+    },
+    {
+      "country": "PL",
+      "index": 44
+    },
+    {
+      "country": "CZ",
+      "index": 48
+    },
+    {
+      "country": "RS",
+      "index": 38
+    },
+    {
+      "country": "TR",
+      "index": 36
+    },
+    {
+      "country": "GE",
+      "index": 35
+    },
+    {
+      "country": "AM",
+      "index": 36
+    },
+    {
+      "country": "TH",
+      "index": 40
+    },
+    {
+      "country": "MY",
+      "index": 37
+    },
+    {
+      "country": "SG",
+      "index": 82
+    },
+    {
+      "country": "JP",
+      "index": 64
+    },
+    {
+      "country": "KZ",
+      "index": 33
+    },
+    {
+      "country": "RU",
+      "index": 42
+    },
+    {
+      "country": "UA",
+      "index": 33
+    },
+    {
+      "country": "UZ",
+      "index": 29
+    },
+    {
+      "country": "KG",
+      "index": 30
+    },
+    {
+      "country": "AZ",
+      "index": 37
+    },
+    {
+      "country": "AR",
+      "index": 38
+    },
+    {
+      "country": "MX",
+      "index": 42
+    },
+    {
+      "country": "CA",
+      "index": 70
+    },
+    {
+      "country": "AU",
+      "index": 76
+    },
+    {
+      "country": "IN",
+      "index": 30
+    },
+    {
+      "country": "EG",
+      "index": 27
+    }
+  ]
+}

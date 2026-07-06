@@ -176,6 +176,8 @@ The frontend API client must send cookies: `fetch(url, { credentials: 'include' 
 | GET | `/api/salary/inflation` | ✅ | Inflation target line (World Bank CPI, Jan-1 steps) |
 | GET | `/api/events?base=&quote=` | ✅ | ⚡ events (>2%/day, >4%/week) incl. cached news headlines |
 | POST | `/api/public/compute` | – (rate-limited) | Stateless compute for guest mode & landing demo |
+| POST | `/api/public/compare` | – (rate-limited) | Offer Comparison: today's-rate FX + cost-of-living-adjusted verdict |
+| GET | `/api/public/compare/meta` | – (rate-limited) | Known-cities list + COL dataset disclaimer/date |
 | POST | `/api/internal/refresh` | secret | Daily cron: rates + inflation + GDELT news headlines |
 | GET | `/api/analytics` | ✅ | Product metrics (v4, not built yet) |
 

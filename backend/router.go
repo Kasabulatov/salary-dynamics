@@ -23,8 +23,10 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestSize(1 << 20)) // 1 MiB body cap on every endpoint
 	r.Use(secureHeaders)
-	r.Use(httprate.LimitByIP(120, time.Minute)) // global rate limit
 
+	// CORS must run BEFORE any rate limiter: a 429 without CORS headers is
+	// blocked by the browser and surfaces as an opaque "Failed to fetch"
+	// instead of a readable error (found by the e2e suite).
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{cfg.CORSOrigin},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -32,6 +34,7 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
+	r.Use(httprate.LimitByIP(cfg.GlobalRatePerMin, time.Minute))
 
 	auth := &handlers.AuthHandler{
 		Store:          store,
@@ -77,6 +80,8 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(httprate.LimitByIP(20, time.Minute))
 		r.Post("/api/public/compute", public.Compute)
+		r.Post("/api/public/compare", public.Compare)
+		r.Get("/api/public/compare/meta", public.CompareMeta)
 	})
 
 	// Protected routes: valid JWT cookie + CSRF header on writes.

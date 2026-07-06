@@ -22,6 +22,9 @@ type Config struct {
 	// (brute-force protection); local/CI compose raises it so the E2E suite
 	// (which registers many users quickly) doesn't trip it.
 	AuthRatePerMin int
+	// Global per-IP rate limit per minute (production default 120; raised in
+	// local/CI compose — repeated E2E runs share one rolling window).
+	GlobalRatePerMin int
 }
 
 func LoadConfig() Config {
@@ -34,7 +37,8 @@ func LoadConfig() Config {
 		CookieSameSite: parseSameSite(envOr("COOKIE_SAMESITE", "lax")),
 		Port:           envOr("PORT", "8080"),
 		MigrationsDir:  envOr("MIGRATIONS_DIR", "migrations"),
-		AuthRatePerMin: 10,
+		AuthRatePerMin:   10,
+		GlobalRatePerMin: 120,
 	}
 	if s := os.Getenv("AUTH_RATE_PER_MIN"); s != "" {
 		n, err := strconv.Atoi(s)
@@ -42,6 +46,13 @@ func LoadConfig() Config {
 			log.Fatalf("AUTH_RATE_PER_MIN must be a positive integer")
 		}
 		cfg.AuthRatePerMin = n
+	}
+	if s := os.Getenv("GLOBAL_RATE_PER_MIN"); s != "" {
+		n, err := strconv.Atoi(s)
+		if err != nil || n < 1 {
+			log.Fatalf("GLOBAL_RATE_PER_MIN must be a positive integer")
+		}
+		cfg.GlobalRatePerMin = n
 	}
 	return cfg
 }
