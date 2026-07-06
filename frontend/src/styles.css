@@ -400,17 +400,27 @@ select {
 }
 .datefield-picker {
   width: 48px;
+  min-width: 48px;
   padding: 12px 8px;
   cursor: pointer;
   color: transparent;
+  position: relative;
+  /* Painted icon: iOS renders no native indicator, so we draw our own. */
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2' stroke-linecap='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='3'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
 }
 .datefield-picker::-webkit-datetime-edit { display: none; }
+/* Chrome's own indicator becomes an invisible full-size hit area. */
 .datefield-picker::-webkit-calendar-picker-indicator {
   cursor: pointer;
+  opacity: 0;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   margin: 0;
-  opacity: 0.55;
 }
-.datefield-picker:hover::-webkit-calendar-picker-indicator { opacity: 1; }
 
 /* ————— Auth pages ————— */
 .auth-page {
