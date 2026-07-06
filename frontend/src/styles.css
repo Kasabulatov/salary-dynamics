@@ -50,6 +50,7 @@ body {
   text-decoration: none;
   padding: 4px 10px;
   border-radius: 8px;
+  white-space: nowrap; /* never break inside "Salary Dynamics" */
   transition: background 0.15s ease, color 0.15s ease;
 }
 .nav a:not(.nav-cta):hover { background: #e8e8ed; color: #1d1d1f; }
@@ -305,6 +306,9 @@ body {
   letter-spacing: -0.01em;
   cursor: pointer;
   background: transparent;
+  text-decoration: none; /* Links styled as buttons must not underline */
+  display: inline-block;
+  text-align: center;
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 .btn-primary { background: #0071e3; color: #fff; }
@@ -529,6 +533,7 @@ select {
   color: #fff !important;
   border-radius: 980px;
   padding: 7px 14px;
+  text-decoration: none;
 }
 .nav-cta:hover { background: #0077ed; color: #fff; }
 
@@ -731,9 +736,39 @@ select {
 
 /* ————— Responsive ————— */
 @media (max-width: 720px) {
-  .hero { padding: 64px 18px 48px; }
-  .section { padding: 48px 18px; }
+  .hero { padding: 56px 18px 44px; }
+  .section { padding: 44px 18px; }
   .segmented { flex-wrap: wrap; justify-content: center; }
-  .entries-table { font-size: 15px; }
-  .note-cell { display: none; }
+
+  /* Nav: two natural rows — links first, auth wraps below; email hidden. */
+  .nav-inner {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 8px 14px;
+    gap: 2px 10px;
+  }
+  .nav a:not(.nav-cta), .nav-link-btn { font-size: 12px; padding: 8px 8px; }
+  .nav-brand { font-size: 15px; }
+  .nav-user { display: none; }
+  .nav-cta { padding: 7px 12px !important; }
+
+  /* History table: compact, and hide the Note column INCLUDING its header. */
+  .entries-table { font-size: 14px; }
+  .entries-table th, .entries-table td { padding: 10px 6px; }
+  .entries-table th:nth-child(4), .note-cell { display: none; }
+  .row-actions .link-btn { padding: 8px 6px; }
+
+  /* Entry form: stacked full-width fields, full-width primary action. */
+  .entry-form-row { flex-direction: column; align-items: stretch; min-width: 0; }
+  .entry-form-row label { min-width: 0; width: 100%; max-width: 100%; }
+  .entry-form-row label > input,
+  .entry-form-row label > select { width: 100%; }
+  .entry-form-actions { flex-direction: column; }
+  .entry-form-actions .btn { width: 100%; }
+  .datefield { width: 100%; }
+  .datefield input[type="text"] { flex: 1; width: auto; min-width: 0; }
+
+  /* Toolbar controls breathe on small screens. */
+  .toolbar { gap: 12px; }
+  .compare-vs { padding: 0; }
 }
