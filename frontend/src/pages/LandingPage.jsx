@@ -128,6 +128,22 @@ export default function LandingPage() {
 
       <section className="section section-alt">
         <div className="section-inner narrow">
+          <h2 className="section-title">Weighing a job offer?</h2>
+          <p className="section-sub">
+            The <strong>Offer Comparison</strong> puts your current salary and an
+            offer side by side — in any of 33 currencies, across cities — and
+            answers honestly: better by exchange rate, and better in <em>real
+            purchasing power</em> (cost-of-living adjusted). No account needed,
+            and you can download the result as an image to share.
+          </p>
+          <div className="hero-ctas">
+            <Link to="/compare" className="btn btn-primary btn-large">Compare an offer</Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-inner narrow">
           <h2 className="section-title">Your data stays yours.</h2>
           <p className="section-sub">
             Guest entries never leave your browser tab. Registered accounts store
