@@ -46,7 +46,7 @@ test.describe('salary tracker', () => {
 
     await page.getByPlaceholder('650 000').fill('4000')
     await page.getByLabel('Salary Currency').selectOption('USD')
-    await page.getByPlaceholder('2024-06-01 or 01.06.2024').fill('15.03.2024')
+    await page.getByPlaceholder('YYYY-MM-DD').fill('15.03.2024')
     await page.getByRole('button', { name: 'Add', exact: true }).click()
     await expect(page.locator('.entries-table tbody tr').first()).toContainText('2024-03-15')
   })

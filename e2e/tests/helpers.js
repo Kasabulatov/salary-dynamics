@@ -23,7 +23,7 @@ export async function addEntry(page, { amount, date, note }) {
   await page.getByPlaceholder('650 000').fill(amount)
   // USD keeps E2E independent of external rate APIs (same-currency path).
   await page.getByLabel('Salary Currency').selectOption('USD')
-  await page.getByPlaceholder('2024-06-01 or 01.06.2024').fill(date)
+  await page.getByPlaceholder('YYYY-MM-DD').fill(date)
   if (note) await page.getByPlaceholder('e.g. promotion, new job').fill(note)
   await page.getByRole('button', { name: 'Add', exact: true }).click()
 }

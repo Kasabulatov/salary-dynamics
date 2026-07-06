@@ -21,25 +21,19 @@ function parseTyped(s) {
 
 const todayISO = () => new Date().toISOString().slice(0, 10)
 
-// Auto-insert separators while typing digits (mobile numeric keyboards have
-// no '-' or '.'): 20240115 -> 2024-01-15, 15032024 -> 15.03.2024. Year-first
-// is chosen when the first 4 digits are a plausible year AND digits 5-6 are a
-// plausible month; otherwise day-first (resolves e.g. 19.03.2024 vs 1903-…).
+// Auto-insert dashes while typing digits (mobile numeric keyboards have no
+// '-'): always YYYY-MM-DD — 20240115 -> 2024-01-15. Dates typed WITH
+// separators (e.g. 15.03.2024 on a desktop keyboard) still parse as before.
 function autoFormat(raw) {
-  const digits = raw.replace(/[^\d]/g, '').slice(0, 8)
-  if (!digits) return raw.trim() === '' ? '' : raw
-  const yearFirst =
-    /^(19|20)/.test(digits) &&
-    (digits.length <= 4 || Number(digits.slice(4, 6).padEnd(2, '1')) <= 12) &&
-    (digits.length < 6 || Number(digits.slice(4, 6)) >= 1)
-  if (yearFirst) {
-    if (digits.length <= 4) return digits
-    if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`
-    return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`
-  }
-  if (digits.length <= 2) return digits
-  if (digits.length <= 4) return `${digits.slice(0, 2)}.${digits.slice(2)}`
-  return `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4)}`
+  // Dots/slashes = the user is typing the European format themselves; leave
+  // it for parseTyped. Dashes are OUR separators — always re-group as ISO
+  // (otherwise our own inserted dash would block the next one).
+  if (/[./]/.test(raw)) return raw
+  const d = raw.replace(/[^\d]/g, '').slice(0, 8)
+  if (!d) return ''
+  if (d.length <= 4) return d
+  if (d.length <= 6) return `${d.slice(0, 4)}-${d.slice(4)}`
+  return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}`
 }
 
 export default function DateField({ value, onChange, showToday = false }) {
@@ -79,7 +73,7 @@ export default function DateField({ value, onChange, showToday = false }) {
         type="text"
         inputMode="numeric"
         autoComplete="off"
-        placeholder="2024-06-01 or 01.06.2024"
+        placeholder="YYYY-MM-DD"
         value={text}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
