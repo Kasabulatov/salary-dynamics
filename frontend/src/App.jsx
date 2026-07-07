@@ -30,7 +30,7 @@ function Nav() {
     return (
       <nav className="nav">
         <div className="nav-inner">
-          <Link to="/welcome" className="nav-brand nav-brand-link">Info</Link>
+          <Link to="/welcome" className="nav-brand nav-brand-link">About</Link>
           <Link to="/">Salary Dynamics</Link>
           <Link to="/compare">Offer Compare</Link>
           <a href="https://forms.gle/A9kN2tPradKXNRkt5" target="_blank"
@@ -49,7 +49,7 @@ function Nav() {
   return (
     <nav className="nav">
       <div className="nav-inner">
-        <Link to="/" className="nav-brand nav-brand-link">Info</Link>
+        <Link to="/" className="nav-brand nav-brand-link">About</Link>
         <Link to="/try">Salary Dynamics</Link>
         <Link to="/compare">Offer Compare</Link>
         <a href="https://forms.gle/A9kN2tPradKXNRkt5" target="_blank"
