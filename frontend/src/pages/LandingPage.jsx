@@ -11,6 +11,15 @@ import CompareChart from '../components/CompareChart'
 // Fictional example data for the live demo (KZT salary with two raises —
 // long enough to show event bands and the inflation line).
 const DEMO_FROM = '2022-03-01'
+
+// Demo end date = first of the current month, NOT "today". A daily-changing
+// end date makes every day's first visitor trigger an ~18s on-demand fetch
+// for the new day's rates; a month-stable range stays served from cached
+// data (~0.9s) for essentially every visitor.
+function demoTo() {
+  const d = new Date()
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-01`
+}
 const DEMO_ENTRIES = [
   { amount: 480000, currency_code: 'KZT', effective_date: '2022-03-01', note: 'first job' },
   { amount: 650000, currency_code: 'KZT', effective_date: '2023-09-01', note: 'promotion' },
@@ -25,13 +34,13 @@ const COMPARE_DEMO = {
 
 export default function LandingPage() {
   const { user } = useAuth()
-  const today = new Date().toISOString().slice(0, 10)
+  const demoEnd = demoTo()
   // Self-healing demo queries: retry transient failures with backoff and
   // refetch on tab focus after an error — a blip must never freeze the demo.
   const demoQ = useQuery({
-    queryKey: ['landing-demo'],
+    queryKey: ['landing-demo', demoEnd],
     queryFn: () => publicCompute({
-      entries: DEMO_ENTRIES, displayCurrency: 'USD', from: DEMO_FROM, to: today,
+      entries: DEMO_ENTRIES, displayCurrency: 'USD', from: DEMO_FROM, to: demoEnd,
     }),
     staleTime: Infinity,
     ...computeRetry,
@@ -110,7 +119,7 @@ export default function LandingPage() {
                 <SalaryChart
                   points={points}
                   from={new Date(DEMO_FROM)}
-                  to={new Date()}
+                  to={new Date(demoEnd)}
                   displayCurrency="USD"
                   events={demo.events}
                   inflationMeta={demo.inflation}
