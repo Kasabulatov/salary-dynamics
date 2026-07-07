@@ -32,6 +32,9 @@ services:
       AUTH_RATE_PER_MIN: ${AUTH_RATE_PER_MIN:-100} # E2E registers many users; prod (Render) keeps 10
       GLOBAL_RATE_PER_MIN: ${GLOBAL_RATE_PER_MIN:-600} # repeated E2E runs share one window; prod keeps 120
       PUBLIC_RATE_PER_MIN: ${PUBLIC_RATE_PER_MIN:-600} # guest compute/compare; prod keeps 60
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8080}
       PORT: "8080"
     ports:
       - "8080:8080"

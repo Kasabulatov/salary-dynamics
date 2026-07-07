@@ -27,3 +27,11 @@ services:
         value: "true"
       - key: COOKIE_SAMESITE # Vercel <-> Render is cross-site: None + Secure required
         value: "none"
+      # Google sign-in — dashboard-managed secrets (sync:false so the
+      # blueprint never overwrites them). Set in Render's Environment tab.
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: PUBLIC_API_URL # this backend's public URL (Render), for the OAuth redirect_uri
+        sync: false

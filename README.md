@@ -168,6 +168,9 @@ The frontend API client must send cookies: `fetch(url, { credentials: 'include' 
 | POST | `/api/login` | – | Log in (sets cookie) |
 | POST | `/api/logout` | – | Clear cookie |
 | GET | `/api/me` | ✅ | Current user (session restore) |
+| GET | `/api/auth/config` | – | Whether Google sign-in is configured (frontend button toggle) |
+| GET | `/api/oauth/google/start` | – | Begin Google sign-in (redirect to consent) |
+| GET | `/api/oauth/google/callback` | – | Google OAuth callback; links by verified email, issues session |
 | GET | `/api/salary?displayCurrency=USD` | ✅ | List entries with historical conversion |
 | POST | `/api/salary` | ✅ | Create entry |
 | PUT | `/api/salary/{id}` | ✅ | Update entry |

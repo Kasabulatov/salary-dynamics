@@ -45,6 +45,19 @@ func (s *Store) CreateUser(ctx context.Context, email, passwordHash string) (Use
 	return u, nil
 }
 
+// FindOrCreateGoogleUser links a Google sign-in to an account by email: an
+// existing account (password or Google) is returned unchanged — its
+// password_hash is preserved so password login keeps working — and a brand
+// new account is created with an empty password_hash (Google-only; bcrypt
+// rejects the empty hash, so it can't be password-logged-in). Atomic via
+// upsert on the unique email, so concurrent first-time logins can't dup.
+func (s *Store) FindOrCreateGoogleUser(ctx context.Context, email string) (User, error) {
+	return scanUser(s.Pool.QueryRow(ctx,
+		`INSERT INTO users (email, password_hash) VALUES ($1, '')
+		 ON CONFLICT (email) DO UPDATE SET updated_at = now()
+		 RETURNING `+userCols, email))
+}
+
 func (s *Store) GetUserByEmail(ctx context.Context, email string) (User, error) {
 	u, err := scanUser(s.Pool.QueryRow(ctx,
 		`SELECT `+userCols+` FROM users WHERE email = $1`, email))

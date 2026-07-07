@@ -32,6 +32,14 @@ type Config struct {
 	// right now". Raised to 60; tune via PUBLIC_RATE_PER_MIN without a code
 	// change if a shared-NAT crowd needs more.
 	PublicRatePerMin int
+
+	// Google sign-in (optional). When ClientID/Secret are unset, the OAuth
+	// endpoints report "not configured" and the frontend hides the button.
+	GoogleClientID     string
+	GoogleClientSecret string
+	// PublicAPIURL is this backend's public base URL — used to build the
+	// OAuth redirect_uri (must match what's registered in Google Cloud).
+	PublicAPIURL string
 }
 
 func LoadConfig() Config {
@@ -47,6 +55,9 @@ func LoadConfig() Config {
 		AuthRatePerMin:   10,
 		GlobalRatePerMin: 120,
 		PublicRatePerMin: 60,
+		GoogleClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+		GoogleClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+		PublicAPIURL:       envOr("PUBLIC_API_URL", "http://localhost:8080"),
 	}
 	if s := os.Getenv("AUTH_RATE_PER_MIN"); s != "" {
 		n, err := strconv.Atoi(s)

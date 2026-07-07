@@ -48,6 +48,14 @@ Metrica settings on ship.
 Also on this branch: Feedback nav link (guest + logged-in) → Google Form
 (forms.gle/A9kN2tPradKXNRkt5, new tab, noopener) with `feedback_click` goal.
 
+**Google sign-in (branch `feature/google-signin`):** "Continue with Google"
+(OAuth 2.0/OIDC) on login + register. Backend `/api/oauth/google/{start,callback}`
++ `/api/auth/config`; links by **verified** email to an existing account
+(password preserved) or creates a password-less one; issues the same session
+cookies as password login. Frontend button shown only when configured
+(`GOOGLE_CLIENT_ID`/`SECRET` + `PUBLIC_API_URL`). Requires a Google Cloud OAuth
+app (redirect URIs for localhost + Render). Metrica goal: `google_signin_click`.
+
 **Next up:**
 - ⏭ follow-up (deferred from Offer Comparison PR): share-image button on the salary-tracker chart
 - ⏭ optional: CSP header on the frontend (needs Metrica allowances) · repo public decision

@@ -4,6 +4,7 @@ import { useAuth } from '../AuthContext'
 import { api } from '../api'
 import { getGuestEntries, clearGuestEntries } from '../guestStore'
 import { track } from '../analytics'
+import GoogleButton from '../components/GoogleButton'
 
 export default function RegisterPage() {
   const { register } = useAuth()
@@ -59,6 +60,7 @@ export default function RegisterPage() {
           </div>
         )}
         {error && <div className="form-error">{error}</div>}
+        <GoogleButton label="Sign up with Google" />
         <label>
           Email
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />

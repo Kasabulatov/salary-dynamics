@@ -115,19 +115,25 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// JWT lives in an HttpOnly cookie (not readable by JS — XSS-safe).
+	setSessionCookies(w, token, csrf, h.CookieSecure, h.sameSite())
+	writeJSON(w, http.StatusOK, u)
+}
+
+// setSessionCookies writes the HttpOnly JWT cookie (not readable by JS —
+// XSS-safe) plus the JS-readable CSRF cookie the frontend echoes in
+// X-CSRF-Token. Shared by password login and Google sign-in so both issue an
+// identical session.
+func setSessionCookies(w http.ResponseWriter, token, csrf string, secure bool, sameSite http.SameSite) {
 	http.SetCookie(w, &http.Cookie{
 		Name: authCookie, Value: token, Path: "/",
 		MaxAge: int(tokenTTL.Seconds()), HttpOnly: true,
-		Secure: h.CookieSecure, SameSite: h.sameSite(),
+		Secure: secure, SameSite: sameSite,
 	})
-	// CSRF token is readable by JS: frontend echoes it in X-CSRF-Token.
 	http.SetCookie(w, &http.Cookie{
 		Name: csrfCookie, Value: csrf, Path: "/",
 		MaxAge: int(tokenTTL.Seconds()), HttpOnly: false,
-		Secure: h.CookieSecure, SameSite: h.sameSite(),
+		Secure: secure, SameSite: sameSite,
 	})
-	writeJSON(w, http.StatusOK, u)
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {

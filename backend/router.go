@@ -42,6 +42,15 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 		CookieSecure:   cfg.CookieSecure,
 		CookieSameSite: cfg.CookieSameSite,
 	}
+	googleAuth := &handlers.GoogleAuthHandler{
+		Store:          store,
+		Google:         services.NewGoogle(cfg.GoogleClientID, cfg.GoogleClientSecret),
+		JWTSecret:      cfg.JWTSecret,
+		CookieSecure:   cfg.CookieSecure,
+		CookieSameSite: cfg.CookieSameSite,
+		PublicAPIURL:   cfg.PublicAPIURL,
+		FrontendURL:    cfg.CORSOrigin,
+	}
 
 	r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -55,6 +64,11 @@ func newRouter(cfg Config, store *database.Store) http.Handler {
 		r.Post("/api/login", auth.Login)
 	})
 	r.Post("/api/logout", auth.Logout)
+
+	// Google sign-in (public, browser-redirect GETs — no cookie/CSRF yet).
+	r.Get("/api/auth/config", googleAuth.Config)
+	r.Get("/api/oauth/google/start", googleAuth.Start)
+	r.Get("/api/oauth/google/callback", googleAuth.Callback)
 
 	frank := services.NewFrankfurter()
 	nbk := services.NewNBK()
