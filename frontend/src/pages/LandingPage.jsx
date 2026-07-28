@@ -7,6 +7,12 @@ import { api } from '../api'
 import { buildChartPoints, targetMapFrom } from '../chartData'
 import SalaryChart from '../components/SalaryChart'
 import CompareChart from '../components/CompareChart'
+// Precomputed demo responses, bundled so the landing paints instantly even
+// while the free-tier backend is cold-starting (30-60s). Regenerated monthly
+// by .github/workflows/update-landing-demo.yml; the live queries below
+// silently swap in fresh data when the backend answers.
+import demoSalaryStatic from '../data/demo-salary.json'
+import demoCompareStatic from '../data/demo-compare.json'
 
 // Fictional example data for the live demo (KZT salary with two raises —
 // long enough to show event bands and the inflation line).
@@ -35,8 +41,9 @@ const COMPARE_DEMO = {
 export default function LandingPage() {
   const { user } = useAuth()
   const demoEnd = demoTo()
-  // Self-healing demo queries: retry transient failures with backoff and
-  // refetch on tab focus after an error — a blip must never freeze the demo.
+  // Background revalidation only — the page renders from the bundled JSON
+  // right away, and these queries double as a warm-up ping for the backend
+  // (by the time a visitor clicks Try/Compare it is usually awake).
   const demoQ = useQuery({
     queryKey: ['landing-demo', demoEnd],
     queryFn: () => publicCompute({
@@ -55,10 +62,14 @@ export default function LandingPage() {
     refetchOnWindowFocus: (query) => query.state.status === 'error',
   })
 
-  const demo = demoQ.data
-  const points = demo
-    ? buildChartPoints(demo.series.points, demo.entries, targetMapFrom(demo.inflation?.points))
-    : []
+  // Live data wins; bundled snapshot otherwise. Same range and same rates, so
+  // the swap is invisible — and a cold/failed backend never blanks the demo.
+  const demo = demoQ.data ?? demoSalaryStatic
+  const compareDemo = compareDemoQ.data ?? demoCompareStatic
+  const points = buildChartPoints(demo.series.points, demo.entries, targetMapFrom(demo.inflation?.points))
+  // End the axis where the rendered data ends (the snapshot may trail the
+  // live range by a month right after a month rollover).
+  const chartEnd = demo.series.points.at(-1)?.date ?? demoEnd
 
   return (
     <main>
@@ -112,26 +123,20 @@ export default function LandingPage() {
             exchange rates and real published inflation — the same engine you'll use.
           </p>
           <div className="chart-panel">
-            {demoQ.isLoading && <div className="chart-empty">Loading the demo with real market data…</div>}
-            {demoQ.isError && <div className="chart-empty">Demo unavailable right now — the product still works.</div>}
-            {demo && (
-              <>
-                <SalaryChart
-                  points={points}
-                  from={new Date(DEMO_FROM)}
-                  to={new Date(demoEnd)}
-                  displayCurrency="USD"
-                  events={demo.events}
-                  inflationMeta={demo.inflation}
-                />
-                <div className="chart-legend">
-                  <span><span className="legend-dot" /> salary change</span>
-                  <span><span className="legend-band red" /> sharp drop</span>
-                  <span><span className="legend-band green" /> sharp rise</span>
-                  <span><span className="legend-target" /> inflation target</span>
-                </div>
-              </>
-            )}
+            <SalaryChart
+              points={points}
+              from={new Date(DEMO_FROM)}
+              to={new Date(chartEnd)}
+              displayCurrency="USD"
+              events={demo.events}
+              inflationMeta={demo.inflation}
+            />
+            <div className="chart-legend">
+              <span><span className="legend-dot" /> salary change</span>
+              <span><span className="legend-band red" /> sharp drop</span>
+              <span><span className="legend-band green" /> sharp rise</span>
+              <span><span className="legend-target" /> inflation target</span>
+            </div>
           </div>
         </div>
       </section>
@@ -179,15 +184,13 @@ export default function LandingPage() {
             purchasing power</em> (cost-of-living adjusted). No account needed,
             and you can download the result as an image to share.
           </p>
-          {compareDemoQ.data && (
-            <div className="chart-panel landing-compare-demo">
-              <p className="compare-verdict">{compareDemoQ.data.verdict}</p>
-              <p className="landing-demo-caption">
-                Live example: 800 000 KZT in Almaty vs a 3 500 EUR offer in Lisbon — today's real rates.
-              </p>
-              <CompareChart result={compareDemoQ.data} />
-            </div>
-          )}
+          <div className="chart-panel landing-compare-demo">
+            <p className="compare-verdict">{compareDemo.verdict}</p>
+            <p className="landing-demo-caption">
+              Live example: 800 000 KZT in Almaty vs a 3 500 EUR offer in Lisbon — real market rates.
+            </p>
+            <CompareChart result={compareDemo} />
+          </div>
           <div className="hero-ctas">
             <Link to="/compare" className="btn btn-primary btn-large">Compare an offer</Link>
           </div>

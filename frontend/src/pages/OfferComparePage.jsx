@@ -7,6 +7,7 @@ import AmountInput from '../components/AmountInput'
 import CityPicker from '../components/CityPicker'
 import CompareChart from '../components/CompareChart'
 import { shareResult, shareLinks } from '../shareImage'
+import { useWakingUp, WAKEUP_MESSAGE } from '../components/wakeup'
 
 const STORAGE_KEY = 'compare_inputs'
 
@@ -81,6 +82,7 @@ export default function OfferComparePage() {
     ...computeRetry,
   })
   const result = compareQ.data ?? null
+  const waking = useWakingUp(compareQ.isFetching)
 
   useEffect(() => {
     track('compare_page_view', {})
@@ -142,11 +144,17 @@ export default function OfferComparePage() {
             </button>
           </div>
 
+          {waking && (
+            <p className="section-sub compare-waking">{WAKEUP_MESSAGE}</p>
+          )}
+
           {compareQ.isError && (
             <div className="form-error compare-error">
               {rateLimited(compareQ.error)
                 ? 'A lot of requests just now — wait a few seconds and press Compare again.'
-                : compareQ.error.message}
+                : compareQ.error.status
+                  ? compareQ.error.message
+                  : 'The server was asleep and may just have woken up — press Compare again.'}
             </div>
           )}
 
