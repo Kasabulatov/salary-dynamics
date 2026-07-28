@@ -48,6 +48,25 @@ Metrica settings on ship.
 Also on this branch: Feedback nav link (guest + logged-in) → Google Form
 (forms.gle/A9kN2tPradKXNRkt5, new tab, noopener) with `feedback_click` goal.
 
+**Cold-start fix (July 28, 2026, branch `fix/cold-start-landing`, rollback tag `pre-cold-start-fix`):**
+the Render free backend sleeps after 15 min idle (30–60 s wake) and the first visit
+used to hang on it twice — the app-wide "Loading…" auth gate (`/api/me`) and the
+landing demo queries. Four layers shipped:
+- Landing demo renders from bundled JSON (`frontend/src/data/demo-*.json`, fetched
+  from the public endpoints; refreshed monthly by `update-landing-demo.yml` since the
+  demo range is month-stable). Live queries stay as silent background revalidation +
+  backend warm-up.
+- Auth gate: browsers without a previous session (`sd_had_session` in localStorage)
+  assume logged-out after 2.5 s so the landing paints instantly; the real `/api/me`
+  answer still applies when it arrives. Returning users keep the gate (their data
+  needs the backend anyway) but see honest wake-up copy.
+- `keep-alive.yml` pings `/health` every 10 min (Render free = 750 h/mo; one 24/7
+  service fits at ~720).
+- Wake-up UX: `/try`, `/compare`, and the auth gate show "Our free server is waking
+  up — up to 30 seconds" after 2.5 s of fetching (`frontend/src/components/wakeup.js`).
+Verified: e2e 9/9 green; landing + both guest pages manually tested against a
+hanging-socket cold-start simulation with the backend stopped.
+
 **Next up:**
 - ⏭ follow-up (deferred from Offer Comparison PR): share-image button on the salary-tracker chart
 - ⏭ optional: CSP header on the frontend (needs Metrica allowances) · repo public decision

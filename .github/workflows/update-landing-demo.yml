@@ -1,0 +1,72 @@
+# Monthly refresh of the bundled landing-page demo data.
+#
+# The landing page renders from static JSON (frontend/src/data/demo-*.json)
+# so a first visit never waits for the free-tier backend's 30-60s cold start.
+# The demo range is month-stable (to = first of current month), so the JSON
+# only needs regenerating once a month, right after the daily rates refresh
+# has ingested the new month's data.
+#
+# Both endpoints are public and stateless; BACKEND_URL is the same secret the
+# rates workflow uses. The commit is pushed with GITHUB_TOKEN, which does NOT
+# trigger the CI workflow — that's acceptable for a data-only change: Vercel
+# builds the frontend on every push regardless, and the backend is untouched.
+name: Update landing demo data
+
+on:
+  schedule:
+    - cron: "15 7 1 * *" # 1st of the month, 07:15 UTC — after the 06:30 rates refresh
+  workflow_dispatch: {} # allows manual runs from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch fresh demo responses
+        run: |
+          set -euo pipefail
+          URL="${{ secrets.BACKEND_URL }}"
+          TO=$(date -u +%Y-%m-01)
+
+          # Long timeout + retries: this call itself may hit a cold start.
+          curl --fail-with-body -sS -m 150 --retry 3 --retry-all-errors -X POST \
+            "$URL/api/public/compute" -H "Content-Type: application/json" -d '{
+              "entries": [
+                {"amount": 480000, "currency_code": "KZT", "effective_date": "2022-03-01", "note": "first job"},
+                {"amount": 650000, "currency_code": "KZT", "effective_date": "2023-09-01", "note": "promotion"},
+                {"amount": 900000, "currency_code": "KZT", "effective_date": "2025-04-01", "note": "senior role"}
+              ],
+              "display_currency": "USD",
+              "from": "2022-03-01",
+              "to": "'"$TO"'",
+              "include_inflation": true,
+              "include_events": true
+            }' | jq '.' > frontend/src/data/demo-salary.json
+
+          curl --fail-with-body -sS -m 60 --retry 3 --retry-all-errors -X POST \
+            "$URL/api/public/compare" -H "Content-Type: application/json" -d '{
+              "current": {"amount": 800000, "currency": "KZT", "city": "Almaty"},
+              "offer": {"amount": 3500, "currency": "EUR", "city": "Lisbon"},
+              "displayCurrency": "USD"
+            }' | jq '.' > frontend/src/data/demo-compare.json
+
+          # Sanity: never commit an empty/truncated demo.
+          jq -e '.series.points | length > 1000' frontend/src/data/demo-salary.json
+          jq -e '.verdict | length > 0' frontend/src/data/demo-compare.json
+
+      - name: Commit if changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet frontend/src/data/; then
+            echo "demo data unchanged — nothing to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add frontend/src/data/demo-salary.json frontend/src/data/demo-compare.json
+          git commit -m "chore(landing): refresh bundled demo data ($(date -u +%Y-%m))"
+          git push

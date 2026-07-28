@@ -9,6 +9,7 @@ import { CURRENCIES, PRESETS, rangeForPreset } from '../currencies'
 import SalaryChart from '../components/SalaryChart'
 import SalaryEntryForm from '../components/SalaryEntryForm'
 import DateField from '../components/DateField'
+import { useWakingUp, WAKEUP_MESSAGE } from '../components/wakeup'
 
 const entryKey = (e) => `${e.effective_date.slice(0, 10)}|${e.amount}|${e.currency_code}`
 
@@ -57,6 +58,7 @@ export default function GuestTrackerPage() {
   }, [computed, showInflation])
 
   const busy = entries.length > 0 && computeQ.isLoading
+  const waking = useWakingUp(busy)
 
   return (
     <main>
@@ -100,12 +102,18 @@ export default function GuestTrackerPage() {
             {entries.length === 0 && (
               <div className="chart-empty">Add your first salary entry below — the chart appears instantly.</div>
             )}
-            {busy && <div className="chart-empty">Computing with real historical rates…</div>}
+            {busy && (
+              <div className="chart-empty">
+                {waking ? WAKEUP_MESSAGE : 'Computing with real historical rates…'}
+              </div>
+            )}
             {computeQ.isError && (
               <div className="chart-empty">
                 {rateLimited(computeQ.error)
                   ? 'A lot of requests just now — wait a few seconds. '
-                  : 'Could not compute right now. '}
+                  : computeQ.error?.status
+                    ? 'Could not compute right now. '
+                    : 'The server was asleep and may just have woken up. '}
                 <button className="btn btn-primary" onClick={() => computeQ.refetch()}>Try again</button>
               </div>
             )}

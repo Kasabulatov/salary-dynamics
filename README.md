@@ -156,6 +156,7 @@ The frontend API client must send cookies: `fetch(url, { credentials: 'include' 
 - **Rate caching:** historical rates are fetched once into the `daily_rates` table; all conversion reads from Postgres. A daily GitHub Actions cron refreshes rates via `POST /api/internal/refresh` (free backends spin down, so no in-process cron).
 - **Auth:** JWT lives in an HttpOnly/Secure/SameSite cookie (not localStorage), so CSRF protection is required on state-changing routes.
 - **Rate sources are pluggable:** a `RateSource` interface resolves each currency pair to a provider — add more central-bank adapters as needed.
+- **Cold-start mitigation:** the Render free tier sleeps after 15 min idle (30–60 s wake). Three layers: (1) the landing page renders from bundled demo JSON (`frontend/src/data/demo-*.json`, refreshed monthly by `update-landing-demo.yml`) and only revalidates in the background; (2) `keep-alive.yml` pings `/health` every 10 min — Render free includes 750 instance-hours/month, and one always-on service uses ~720, so it fits; (3) guest pages show an honest "server is waking up" notice when a request runs long.
 
 ---
 

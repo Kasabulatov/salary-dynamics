@@ -1,0 +1,24 @@
+# Keeps the Render free-tier backend from spinning down (it sleeps after
+# 15 min idle; waking takes 30-60s). A ping every 10 minutes keeps it warm.
+#
+# Budget: Render free tier includes 750 instance-hours/month; one service
+# running 24/7 uses ~720, so an always-warm single service fits.
+#
+# Failures are tolerated on purpose (|| true): a missed ping just means the
+# next visitor waits for one cold start — not worth red X noise in Actions.
+# NOTE: GitHub pauses scheduled workflows in repos with no activity for
+# 60 days; any commit re-enables them.
+name: Keep backend awake
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        run: |
+          curl -sS -m 60 --fail "${{ secrets.BACKEND_URL }}/health" || true

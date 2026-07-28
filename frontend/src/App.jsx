@@ -8,16 +8,24 @@ import SalaryTrackerPage from './pages/SalaryTrackerPage'
 import GuestTrackerPage from './pages/GuestTrackerPage'
 import OfferComparePage from './pages/OfferComparePage'
 import MetricaTag from './components/MetricaTag'
+import { useWakingUp, WAKEUP_MESSAGE } from './components/wakeup'
+
+// Auth-gate placeholder. Only browsers with a previous session ever hold
+// this longer than 2.5s (see AuthContext) — be honest about why.
+function PageLoading() {
+  const waking = useWakingUp(true)
+  return <div className="page-loading">{waking ? WAKEUP_MESSAGE : 'Loading…'}</div>
+}
 
 function Home() {
   const { user } = useAuth()
-  if (user === undefined) return <div className="page-loading">Loading…</div>
+  if (user === undefined) return <PageLoading />
   return user ? <SalaryTrackerPage /> : <LandingPage />
 }
 
 function GuestOnly({ children }) {
   const { user } = useAuth()
-  if (user === undefined) return <div className="page-loading">Loading…</div>
+  if (user === undefined) return <PageLoading />
   if (user) return <Navigate to="/" replace />
   return children
 }
