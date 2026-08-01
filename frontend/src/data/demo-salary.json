@@ -65,6 +65,30 @@
       "absolute_change": -0.00009725710798821419,
       "news_headline": "How the Latest Sanctions Will Impact Russia—and the World - Carnegie Endowment for International Peace",
       "news_url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPM1l5eTVfMHZWUlJaSUFiUzEwU3pOV0FEbU82ckdONVM4bmZocFBLaEg2cFhVaUZaYmFQRFlUYWFTMXpUSVFIdHpHaVdfd3pncXRoUF9XX1VQYlNBc2RQZ25BY3c0NFdReGlUeEZIcHNGYWt5RS02aE9pMmFqRHBJVUZhcDZTR1NUYUl2N1Z3UENMOU9HMWFYTDM5Zw?oc=5"
+    },
+    {
+      "id": 157,
+      "date": "2026-07-14T00:00:00Z",
+      "ref_date": "2026-07-13T00:00:00Z",
+      "base_currency": "KZT",
+      "quote_currency": "USD",
+      "change_window": "daily",
+      "percent_change": -2.5989813669803685,
+      "absolute_change": -0.00005592695158228517,
+      "news_headline": "Kazakhstan to officially launch digital tenge on July 18 - Qazinform",
+      "news_url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxOT1JwQXlRNFhaNGhad1d3ekRtU0RfUTd0Vk5iOVN1RnNBMEYwbUh3TEc1LTI4OXpRbzJKR1BuZWVmaDFybFVqX05QNEJyckt2MzFfNUJzZDdfendWWDcwa0d0cE0xeUZiRDV2SU03TjVyd21XU1AyWHR5OVdTTzZVdzdYYXJfTG5lZ0tZS0VtMmZXX3FU0gGUAUFVX3lxTE8tTXpCbnhwazhVdzhFcVdnbEFKSk1IaDFEWE9uUmZ5a0FmSXpnTEFlZVN2QXk2MVVndzhvcWZOUFpfc1dCZ1ZyMmp5cWdzZEFWZEc2a3pPYU8xQmRSZ2trLUtMVGZkdXFuZEVYaXFDZFNSOW1SLTRuVmxQWFd6V2o4UnU0OUhDTWtQZk8zaG5yMENhRnU?oc=5"
+    },
+    {
+      "id": 270,
+      "date": "2026-07-25T00:00:00Z",
+      "ref_date": "2026-07-24T00:00:00Z",
+      "base_currency": "KZT",
+      "quote_currency": "USD",
+      "change_window": "daily",
+      "percent_change": -2.169848971789856,
+      "absolute_change": -0.00004658927667346288,
+      "news_headline": "Li Auto launches new L9 in Kazakhstan, signs local assembly deal - CnEVPost",
+      "news_url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxNaFprR1RBSXRxM2pZUGJnSHQybkljLWVSS2UtZWRlV3BMYW41OGhNQVBVOFplNXRFOHJHNXhvUm1zTGZxLVF2TDJsWXBOUkljYmF5aEtadWwzdGVId3J2bmFkVUFtZ1FTWDlmb1RucTlBckdJaEEzcm5JTDlqSHRjR2hVMGM3VE1mLVdwamxn?oc=5"
     }
   ],
   "inflation": {
@@ -6404,6 +6428,130 @@
       {
         "date": "2026-07-01",
         "value": 1592.5503640895965
+      },
+      {
+        "date": "2026-07-02",
+        "value": 1597.4018508224158
+      },
+      {
+        "date": "2026-07-03",
+        "value": 1613.528381194071
+      },
+      {
+        "date": "2026-07-04",
+        "value": 1621.8689723643645
+      },
+      {
+        "date": "2026-07-05",
+        "value": 1621.8689723643645
+      },
+      {
+        "date": "2026-07-06",
+        "value": 1621.8689723643645
+      },
+      {
+        "date": "2026-07-07",
+        "value": 1621.8689723643645
+      },
+      {
+        "date": "2026-07-08",
+        "value": 1625.277706829889
+      },
+      {
+        "date": "2026-07-09",
+        "value": 1635.90497676215
+      },
+      {
+        "date": "2026-07-10",
+        "value": 1637.8999401492285
+      },
+      {
+        "date": "2026-07-11",
+        "value": 1647.4162618087646
+      },
+      {
+        "date": "2026-07-12",
+        "value": 1647.4162618087646
+      },
+      {
+        "date": "2026-07-13",
+        "value": 1647.4162618087646
+      },
+      {
+        "date": "2026-07-14",
+        "value": 1604.6002201277502
+      },
+      {
+        "date": "2026-07-15",
+        "value": 1632.7649100519343
+      },
+      {
+        "date": "2026-07-16",
+        "value": 1629.8797364866641
+      },
+      {
+        "date": "2026-07-17",
+        "value": 1620.8045285708408
+      },
+      {
+        "date": "2026-07-18",
+        "value": 1629.4634464064682
+      },
+      {
+        "date": "2026-07-19",
+        "value": 1629.4634464064682
+      },
+      {
+        "date": "2026-07-20",
+        "value": 1629.4634464064682
+      },
+      {
+        "date": "2026-07-21",
+        "value": 1627.9042507126626
+      },
+      {
+        "date": "2026-07-22",
+        "value": 1630.2962393261164
+      },
+      {
+        "date": "2026-07-23",
+        "value": 1637.059362825085
+      },
+      {
+        "date": "2026-07-24",
+        "value": 1643.7729441859212
+      },
+      {
+        "date": "2026-07-25",
+        "value": 1608.105553857943
+      },
+      {
+        "date": "2026-07-26",
+        "value": 1608.105553857943
+      },
+      {
+        "date": "2026-07-27",
+        "value": 1608.105553857943
+      },
+      {
+        "date": "2026-07-28",
+        "value": 1617.1753507079657
+      },
+      {
+        "date": "2026-07-29",
+        "value": 1605.811874200631
+      },
+      {
+        "date": "2026-07-30",
+        "value": 1604.398455529792
+      },
+      {
+        "date": "2026-07-31",
+        "value": 1612.9844532059728
+      },
+      {
+        "date": "2026-08-01",
+        "value": 1616.5265546678581
       }
     ],
     "country_code": "KZ",
@@ -12755,6 +12903,130 @@
       {
         "date": "2026-07-01",
         "value": 1872.191712431353
+      },
+      {
+        "date": "2026-07-02",
+        "value": 1877.895088261069
+      },
+      {
+        "date": "2026-07-03",
+        "value": 1896.8533310852108
+      },
+      {
+        "date": "2026-07-04",
+        "value": 1906.6584750969218
+      },
+      {
+        "date": "2026-07-05",
+        "value": 1906.6584750969218
+      },
+      {
+        "date": "2026-07-06",
+        "value": 1906.6584750969218
+      },
+      {
+        "date": "2026-07-07",
+        "value": 1906.6584750969218
+      },
+      {
+        "date": "2026-07-08",
+        "value": 1910.6657608695652
+      },
+      {
+        "date": "2026-07-09",
+        "value": 1923.159109363648
+      },
+      {
+        "date": "2026-07-10",
+        "value": 1925.50437517383
+      },
+      {
+        "date": "2026-07-11",
+        "value": 1936.6917002001248
+      },
+      {
+        "date": "2026-07-12",
+        "value": 1936.6917002001248
+      },
+      {
+        "date": "2026-07-13",
+        "value": 1936.6917002001248
+      },
+      {
+        "date": "2026-07-14",
+        "value": 1886.3574437760683
+      },
+      {
+        "date": "2026-07-15",
+        "value": 1919.4676676335096
+      },
+      {
+        "date": "2026-07-16",
+        "value": 1916.0758766047136
+      },
+      {
+        "date": "2026-07-17",
+        "value": 1905.4071219883983
+      },
+      {
+        "date": "2026-07-18",
+        "value": 1915.5864887299663
+      },
+      {
+        "date": "2026-07-19",
+        "value": 1915.5864887299663
+      },
+      {
+        "date": "2026-07-20",
+        "value": 1915.5864887299663
+      },
+      {
+        "date": "2026-07-21",
+        "value": 1913.753508548099
+      },
+      {
+        "date": "2026-07-22",
+        "value": 1916.5655145978408
+      },
+      {
+        "date": "2026-07-23",
+        "value": 1924.5161980113332
+      },
+      {
+        "date": "2026-07-24",
+        "value": 1932.4086400137414
+      },
+      {
+        "date": "2026-07-25",
+        "value": 1890.4782910076249
+      },
+      {
+        "date": "2026-07-26",
+        "value": 1890.4782910076249
+      },
+      {
+        "date": "2026-07-27",
+        "value": 1890.4782910076249
+      },
+      {
+        "date": "2026-07-28",
+        "value": 1901.1406844106464
+      },
+      {
+        "date": "2026-07-29",
+        "value": 1887.7818563188255
+      },
+      {
+        "date": "2026-07-30",
+        "value": 1886.1202506444245
+      },
+      {
+        "date": "2026-07-31",
+        "value": 1896.2138929271223
+      },
+      {
+        "date": "2026-08-01",
+        "value": 1900.3779640617413
       }
     ]
   }
