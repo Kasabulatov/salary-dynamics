@@ -1,27 +1,27 @@
 {
   "current": {
-    "amountConverted": 1730.4,
+    "amountConverted": 1814.6,
     "colIndex": 34,
-    "realValue": 5089.5,
+    "realValue": 5337.2,
     "colLevel": "city"
   },
   "displayCurrency": "USD",
   "fx": {
-    "offerVsCurrentPct": 134.5
+    "offerVsCurrentPct": 119.1
   },
   "notes": [
     "Exchange rates are today's rates.",
     "Cost-of-living indices are approximate, manually curated (updated 2026-07-06)."
   ],
   "offer": {
-    "amountConverted": 4058.6,
+    "amountConverted": 3975.6,
     "colIndex": 55,
-    "realValue": 7379.2,
+    "realValue": 7228.4,
     "colLevel": "city"
   },
   "real": {
     "available": true,
-    "offerVsCurrentPct": 45
+    "offerVsCurrentPct": 35.4
   },
-  "verdict": "The offer is worth about 134% more by exchange rate, and about 45% more in real purchasing power."
+  "verdict": "The offer is worth about 119% more by exchange rate, and about 35% more in real purchasing power."
 }
